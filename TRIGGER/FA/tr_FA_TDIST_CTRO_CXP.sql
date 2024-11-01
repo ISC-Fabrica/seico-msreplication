@@ -13,7 +13,7 @@ declare @codigo varchar(30)='',
 		@observacion varchar(max)='',
 		@tipo char(1)
 
-		SET @observacion='EMP_ID_EMPRESA,DC_SECUENCIA'
+		SET @observacion='EMP_ID_EMPRESA,DC_SECUENCIA,DCXP_LINEA'
 
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
@@ -56,7 +56,7 @@ AS
 		@observacion varchar(max)='',
 		@tipo char(1)
 
-		SET @observacion='EMP_ID_EMPRESA,DC_SECUENCIA'
+		SET @observacion='EMP_ID_EMPRESA,DC_SECUENCIA,DCXP_LINEA'
 
 BEGIN
 	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=DC_SECUENCIA,@codigo3=DCXP_LINEA
