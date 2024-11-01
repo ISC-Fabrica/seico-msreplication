@@ -1,16 +1,26 @@
+
+IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'tr_FA_LOCAL_COLOCADOS')
+	DROP TRIGGER tr_FA_LOCAL_COLOCADOS
+GO
+
 CREATE TRIGGER tr_FA_LOCAL_COLOCADOS  
 ON FA_LOCAL_COLOCADOS 
 AFTER INSERT,DELETE   
 AS 
 
 declare @codigo varchar(30)='',
+		@codigo2 varchar(30)='',
+		@codigo3 varchar(30)='',
+		@observacion varchar(max)='',
 		@tipo char(1)
 
+		set @observacion ='EMP_ID_EMPRESA,COD_LOCAL,COD_INTER_LOCAL'
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
 	
-	SELECT @codigo= pk_Id FROM inserted
-	order by pk_Id asc
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=COD_LOCAL,@codigo3=COD_INTER_LOCAL
+	FROM inserted
+	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='I'
 
@@ -18,17 +28,23 @@ END
 
 IF  EXISTS (SELECT * FROM deleted)
 BEGIN
-	SELECT @codigo= pk_Id FROM deleted
-	order by pk_Id asc
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=COD_LOCAL,@codigo3=COD_INTER_LOCAL
+	FROM deleted
+	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='D'
 END
 
 IF @tipo IS NOT NULL AND @codigo !=''
 BEGIN
-	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status])
-					VALUES('FA_LOCAL_COLOCADOS',@tipo,@codigo,1)
+			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
+				VALUES('FA_LOCAL_COLOCADOS',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
 END
+GO
+
+
+IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'TR_FA_LOCAL_COLOCADOS_UP')
+	DROP TRIGGER TR_FA_LOCAL_COLOCADOS_UP
 GO
 
 CREATE TRIGGER TR_FA_LOCAL_COLOCADOS_UP
@@ -37,18 +53,24 @@ AFTER UPDATE
 AS
 
 	declare @codigo varchar(30)='',
-			@tipo char(1)
+		@codigo2 varchar(30)='',
+		@codigo3 varchar(30)='',
+		@observacion varchar(max)='',
+		@tipo char(1)
+
+		set @observacion ='EMP_ID_EMPRESA,COD_LOCAL,COD_INTER_LOCAL'
 
 BEGIN
-	SELECT @codigo= pk_Id FROM inserted
-	order by pk_Id asc
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=COD_LOCAL,@codigo3=COD_INTER_LOCAL
+	FROM inserted
+	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='U'
 
 	IF @codigo !=''
 	BEGIN
-		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status])
-					VALUES('FA_LOCAL_COLOCADOS',@tipo,@codigo,1)
+				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
+					VALUES('FA_LOCAL_COLOCADOS',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
 	END
 END
 
