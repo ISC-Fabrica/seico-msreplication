@@ -7,10 +7,12 @@ AFTER INSERT,DELETE
 AS 
 
 declare @codigo varchar(30)='',
+		@codigo2 varchar(30)='',
+		@codigo3 varchar(30)='',
 		@observarcion varchar(max)='',
 		@tipo char(1)
 
-		set @observarcion='obb_codigo'
+		set @observarcion='obb_codigo,dob_local,dob_estado'
 
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
@@ -33,8 +35,8 @@ END
 
 IF @tipo IS NOT NULL AND @codigo !=''
 BEGIN
-	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status],observacion)
-					VALUES('FA_detalle_obj_bienes',@tipo,@codigo,1,@observarcion)
+	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
+					VALUES('FA_detalle_obj_bienes',@tipo,@codigo,@codigo2,@codigo3,1,@observarcion)
 END
 GO
 
@@ -48,8 +50,12 @@ AFTER UPDATE
 AS
 
 	declare @codigo varchar(30)='',
-			@observarcion varchar(max)='',
-			@tipo char(1)
+		@codigo2 varchar(30)='',
+		@codigo3 varchar(30)='',
+		@observarcion varchar(max)='',
+		@tipo char(1)
+
+		set @observarcion='obb_codigo,dob_local,dob_estado'
 
 BEGIN
 	SELECT @codigo= obb_codigo
@@ -60,8 +66,8 @@ BEGIN
 
 	IF @codigo !=''
 	BEGIN
-		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status],observacion)
-					VALUES('FA_detalle_obj_bienes',@tipo,@codigo,1,@observarcion)
+		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
+					VALUES('FA_detalle_obj_bienes',@tipo,@codigo,@codigo2,@codigo3,1,@observarcion)
 	END
 END
 

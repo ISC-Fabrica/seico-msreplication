@@ -13,6 +13,8 @@ declare @codigo varchar(30)='',
 		@observacion varchar(max)='',
 		@tipo char(1)
 
+		SET @observacion ='EMP_ID_EMPRESA,num_factura,cli_codigo,cod_banco'
+
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
 	
@@ -55,6 +57,8 @@ AS
 			@codigo4 varchar(30)='',
 			@observacion varchar(max)='',
 			@tipo char(1)
+
+			SET @observacion ='EMP_ID_EMPRESA,num_factura,cli_codigo,cod_banco'
 
 BEGIN
 	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=num_factura,@codigo3=cli_codigo,@codigo4=cod_banco 

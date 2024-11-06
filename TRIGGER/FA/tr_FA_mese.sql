@@ -25,7 +25,8 @@ END
 
 IF  EXISTS (SELECT * FROM deleted)
 BEGIN
-	SELECT @codigo= mes FROM deleted
+	SELECT @codigo= mes 
+	FROM deleted
 	order by mes asc
 
 	SET @tipo ='D'
