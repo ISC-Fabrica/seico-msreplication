@@ -35,7 +35,7 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!=''
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_generacion_comprobante',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
@@ -60,12 +60,13 @@ AS
 		set @observacion='EMP_ID_EMPRESA,gco_numero,gco_tipo'
 
 BEGIN
-	SELECT @codigo= EMP_ID_EMPRESA FROM inserted
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=gco_numero,@codigo3=gco_tipo 
+	from inserted
 	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND @codigo2!='' AND @codigo3!=''
 	BEGIN
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_generacion_comprobante',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
