@@ -10,8 +10,7 @@ AS
 BEGIN
 	DECLARE @mensaje varchar(max) =''
 	IF @accion ='I'
-	BEGIN
-			
+	BEGIN		
 		DECLARE @nombreTabla NVARCHAR(128)= N''
 		DECLARE @sqlInsert NVARCHAR(MAX);
 		DECLARE @columns NVARCHAR(MAX);
@@ -33,9 +32,6 @@ BEGIN
 				@values = STRING_AGG(''''+ [value] + '''', ', ')  
 		FROM #VALOR
 
-		SELECT @columns
-		SELECT @values
-
 		DROP TABLE #VALOR
     
 		-- Crear la sentencia de INSERT dinámica
@@ -44,74 +40,48 @@ BEGIN
 		---- Ejecutar el SQL dinámico
 		EXEC sp_executesql @sqlInsert;
 
-		select  @nombreTabla
-		select @columns
-		select @values
 	END
 
 	IF @accion ='U'
 	BEGIN
-		PRINT'HOLA'
-		--IF @nombreTable='FA_ACTIVIDAD_ECO'
-		--BEGIN
-		--BEGIN TRY
-		--BEGIN TRANSACTION insertFA_ACTIVIDAD_ECO
-
-		--	DECLARE @updateCodigo varchar(20), @updateNombre varchar(max),@updateNivel numeric				
-
-		--	SELECT @insetCodigo=codigo,@insertNombre=nombre,@insertNivel=nivel FROM 
-		--	OPENJSON(@json)
-		--		WITH( 
-		--		codigo VARCHAR(50) '$.codigo',
-		--		nombre VARCHAR(max) '$.nombre',
-		--		nivel numeric '$.nivel' 
-		--	)
-				
-		--	UPDATE FA_ACTIVIDAD_ECO_PRUEBA SET nombre = @updateNombre, nivel = @updateNivel
-		--	WHERE codigo = @updateCodigo
-
-		--COMMIT TRANSACTION insertFA_ACTIVIDAD_ECO
-		--END TRY
-		--BEGIN CATCH
-		--IF (@@TRANCOUNT > 0)
-		--BEGIN
-		--	ROLLBACK TRANSACTION insertFA_ACTIVIDAD_ECO	
-		--	SET @mensaje = ERROR_MESSAGE()
-		--	RAISERROR (15600, -1, -1, @mensaje);
-		--END 
-		--END CATCH		
-				
-		--END
 		
-		--IF @nombreTable ='FA_mese'
-		--BEGIN
-		--BEGIN TRY
-		--BEGIN TRANSACTION insertFA_mese
-							
-		--		DECLARE @UpdateMes numeric =0, @UpdateNombreMes varchar(100)							
-		--		SELECT @UpdateMes = mes, @UpdateNombreMes = nombre FROM 
-		--		OPENJSON(@json)
-		--			WITH( 
-		--			mes VARCHAR(50) '$.mes',
-		--			nombre VARCHAR(max) '$.nombre'					
-		--		)
+		CREATE TABLE #VALORUP
+		(
+			id int identity primary key,
+			valor varchar (max),
+			columna varchar(max)
+		)
 
-			
-		--		UPDATE  FA_mese_Prueba SET nombre=@UpdateNombreMes
-		--		WHERE mes = @UpdateMes
-					
-		--COMMIT TRANSACTION insertFA_mese
-		--END TRY
-		--BEGIN CATCH
-		--IF (@@TRANCOUNT > 0)
-		--BEGIN
-		--	ROLLBACK TRANSACTION insertFA_mese	
-		--	SET @mensaje = ERROR_MESSAGE()
-		--	RAISERROR (15600, -1, -1, @mensaje);
-		--END 
-		--END CATCH
-				
-		--END
+		DECLARE @sqlUpdate NVARCHAR(MAX), @textUp varchar(max),@textUp2 varchar(max);
+	
+		INSERT INTO #VALORUP(columna,valor)
+		SELECT [key] as columna, [value] as valor	
+		FROM OPENJSON(@json)
+
+		declare @conUp int=0, @secUp int =1
+
+		set @conUp = (select count(*) from #VALORUP)
+		DECLARE @columnsUP NVARCHAR(MAX);
+		DECLARE @valuesUP NVARCHAR(MAX);
+		SET @columnsUP = '';
+		SET @valuesUP = '';
+		SET @textUp = ''
+		WHILE @conUp >= @secUp
+		BEGIN			
+				SELECT @columnsUP = STRING_AGG(QUOTENAME(columna), ', '),
+					@valuesUP = STRING_AGG(''''+ valor + '''', ', ')  
+				FROM #VALORUP
+				WHERE id=@secUp
+
+				IF @@ROWCOUNT =0
+				BREAK;
+				SET @textUp +=  @columnsUP + '=' + @valuesUP + ','			
+				SET @secUp += 1
+
+
+		END
+		SELECT subString(@textUp,1, len(@textUp) - 1)
+		DROP TABLE #VALORUP    	
 		
 	END
 	
