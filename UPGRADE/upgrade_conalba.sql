@@ -58,6 +58,47 @@ BEGIN
   ALTER TABLE temp_registroMigracion ADD fechaModificacion datetime
 END
 
+IF NOT (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'temp_registroMigrado'))
+BEGIN
+	CREATE TABLE temp_registroMigrado(
+		id int identity(1,1),
+		nombre_table varchar(200),
+		tipo varchar(10),
+		codigo varchar(30),
+		codigo2 varchar(30),
+		codigo3 varchar(30),
+		codigo4 varchar(30),
+		codigo5 varchar(30),
+		codigo6 varchar(30),
+		observacion varchar(500),
+		[status] INT,
+		fechaRegistro datetime default getdate()
+	)
+
+	PRINT 'CREATE TABLE temp_registroMigrado'
+END
+
+IF NOT (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'temp_logRegistroTrigger'))
+BEGIN
+	CREATE TABLE temp_logRegistroTrigger(
+		id int identity(1,1),
+		nombre_table varchar(200),
+		nombre_trigger varchar(200),
+		errorline varchar(10),
+		message varchar(30),
+		fechaRegistro datetime default getdate()
+	)
+
+	PRINT 'CREATE TABLE temp_logRegistroTrigger'
+END
+
+
 IF not exists
 (
 SELECT *
