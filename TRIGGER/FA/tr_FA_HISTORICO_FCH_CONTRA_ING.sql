@@ -9,8 +9,8 @@ AS
 
 	declare @codigo varchar(30)='',
 			@codigo2 varchar(30)='',
-			@codigo3 varchar(30)='',
-			@codigo4 varchar(30)='',
+			@codigo3 datetime,
+			@codigo4 datetime,
 			@codigo5 varchar(30)='',
 			@observacion varchar(max)='',
 			@tipo char(1)
@@ -40,7 +40,7 @@ END
 IF @tipo IS NOT NULL AND @codigo !=''
 BEGIN
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,[status],observacion)
-			VALUES('FA_HISTORICO_FCH_CONTRA_ING',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,1,@observacion)
+			VALUES('FA_HISTORICO_FCH_CONTRA_ING',@tipo,@codigo,@codigo2,CONVERT(VARCHAR(50),@codigo3,121) ,CONVERT(VARCHAR(50),@codigo4,121),@codigo5,1,@observacion)
 END
 GO
 
@@ -73,7 +73,7 @@ BEGIN
 	IF @codigo !=''
 	BEGIN
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,[status],observacion)
-			VALUES('FA_HISTORICO_FCH_CONTRA_ING',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,1,@observacion)
+			VALUES('FA_HISTORICO_FCH_CONTRA_ING',@tipo,@codigo,@codigo2,CONVERT(VARCHAR(50),@codigo3,121) ,CONVERT(VARCHAR(50),@codigo4,121),@codigo5,1,@observacion)
 	END
 END
 

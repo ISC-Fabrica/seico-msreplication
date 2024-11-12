@@ -17,6 +17,14 @@ IF OBJECT_ID('tempdb..##RESULTADO2') IS NOT NULL
 		DROP TABLE ##RESULTADO2
 IF OBJECT_ID('tempdb..##RESULTADO3') IS NOT NULL
 		DROP TABLE ##RESULTADO3
+IF OBJECT_ID('tempdb..##RESULTADO4') IS NOT NULL
+		DROP TABLE ##RESULTADO4
+IF OBJECT_ID('tempdb..##RESULTADO5') IS NOT NULL
+		DROP TABLE ##RESULTADO5
+IF OBJECT_ID('tempdb..##RESULTADOU') IS NOT NULL
+		DROP TABLE ##RESULTADOU
+IF OBJECT_ID('tempdb..##RESULTADOU2') IS NOT NULL
+		DROP TABLE ##RESULTADOU2
 
 CREATE TABLE #migracionCodigo(
 	id int identity(1,1),
@@ -48,7 +56,6 @@ CREATE TABLE #migracionCodigo3(
 	observacion varchar(max)
 )
 
-
 CREATE TABLE #migracionCodigo4(
 	id int identity(1,1),
 	codigoMigracion int,
@@ -74,13 +81,22 @@ CREATE TABLE #migracionCodigo5(
 	observacion varchar(max)
 )
 
-
 CREATE TABLE #migracionCodigoU1(
 	id int identity(1,1),
 	codigoMigracion int,
 	nombre_tabla varchar(200),
 	tipo varchar(3),
 	codigo varchar(200),
+	observacion varchar(max)
+)
+
+CREATE TABLE #migracionCodigoU2(
+	id int identity(1,1),
+	codigoMigracion int,
+	nombre_tabla varchar(200),
+	tipo varchar(3),
+	codigo varchar(200),
+	codigo2 varchar(200),
 	observacion varchar(max)
 )
 
@@ -98,7 +114,20 @@ NombreCampo4 varchar(200),
 NombreCampo5 varchar(200),
 )
 
+ALTER TABLE #camposWhere
+ALTER COLUMN codigo1 VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS;
 
+ALTER TABLE #camposWhere
+ALTER COLUMN codigo2 VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS;
+
+ALTER TABLE #camposWhere
+ALTER COLUMN codigo3 VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS;
+
+ALTER TABLE #camposWhere
+ALTER COLUMN codigo4 VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS;
+
+ALTER TABLE #camposWhere
+ALTER COLUMN codigo5 VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS;
 
 IF @accion='1'
 BEGIN
@@ -182,12 +211,17 @@ BEGIN
 				1,
 				''
 				))
+
+				IF (LEN(@codigo)>19)
+						SET @codigo = 'CONVERT(datetime,'''+@codigo+''',121)'
+				ELSE
+					SET @codigo = '''' + @codigo + ''''
 	
 				IF OBJECT_ID('tempdb..##RESULTADO') IS NOT NULL
 				BEGIN
 					IF (SELECT COUNT (1) FROM ##RESULTADO)> 0
 					SET @CreateTABLE =N'SELECT ' + @text + 
-					' FROM ' + @nombreTable + ' WHERE ' + @observacion+'=''' + @codigo + ''''	
+					' FROM ' + @nombreTable + ' WHERE ' + @observacion+'=' + @codigo
 										
 					INSERT INTO ##RESULTADO
 					EXECUTE sp_executeSQL @CreateTABLE
@@ -196,7 +230,7 @@ BEGIN
 				IF OBJECT_ID('tempdb..##RESULTADO') IS NULL
 				BEGIN		
 					SET @CreateTABLE =N'SELECT ' + @text +
-					' INTO ##RESULTADO FROM ' + @nombreTable + ' WHERE ' + @observacion+'=''' + @codigo + ''''			
+					' INTO ##RESULTADO FROM ' + @nombreTable + ' WHERE ' + @observacion+'=' + @codigo			
 					EXECUTE sp_executeSQL @CreateTABLE
 					
 				END
@@ -211,22 +245,63 @@ BEGIN
 					DECLARE @Columns1 NVARCHAR(MAX);
 					DECLARE @Sql1 NVARCHAR(MAX);								
 
-					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns1 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO')) 
+					CREATE TABLE #DatosRegistros1(
+					id int identity(1,1),
+					columna varchar(max),
+					valorDefault varchar(max)
+					)
+					
+					SELECT ROW_NUMBER() OVER(ORDER BY a.name) as id,B.name AS tipo, a.name AS columna
+					INTO #TIPODATO1
+					FROM TempDB.SYS.COLUMNS a
+					INNER JOIN  TempDB.sys.types B ON a.user_type_id=B.user_type_id
+					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO') AND is_identity = 0
 
-					SET @Sql1 = (SELECT STRING_AGG(				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS varchar(MAX)) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
+					DECLARE @contTipo1 int = 0, @secTipo1 int = 1
+
+					SET @contTipo1 = (SELECT COUNT(*) FROM #TIPODATO1)
+					WHILE @contTipo1 >= @secTipo1
+					BEGIN
+						DECLARE @nombre1 varchar(max)='', @tipoDato1 varchar(max)='', @ValorDefault1 VARCHAR(MAX)=''
+						
+						SELECT 
+						@nombre1=columna,
+						@tipoDato1=tipo 
+						FROM #TIPODATO1 WHERE id = @secTipo1
+						
+						IF @@ROWCOUNT = 0
+						BREAK;
+
+						IF @TipoDato1 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							SET @ValorDefault1 = '0';  -- Valor por defecto numérico
+						ELSE IF @TipoDato1 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
+							SET @ValorDefault1 = '''''' ;  -- Valor por defecto texto
+						ELSE IF @TipoDato1 IN ('datetime', 'date', 'time')  -- Tipos de fecha
+							SET @ValorDefault1 = '''1900-01-01''' ;  -- Valor por defecto fecha
+						ELSE
+							SET @ValorDefault1 = '''Desconocido''' ;  -- Valor por defecto genérico
+				
+						
+						insert into #DatosRegistros1 (columna,valorDefault)
+												VALUES(@nombre1,@ValorDefault1)
+
+						SET @secTipo1 +=1
+					END
+
+					 SET @Sql1 = (SELECT STRING_AGG(
+				
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(columna) AS varchar(MAX)) + '), '+ valorDefault +') AS ' +CAST(QUOTENAME(columna) AS varchar(MAX)), 
 						', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO')) 
+					FROM #DatosRegistros1)
 
-					-- Ejecutar la consulta dinámica y obtener el resultado en formato JSON
+				
 					SET @Sql1 ='SELECT '''+ @nomPrincipal + ''' AS tabla, '+				
 					'((SELECT  ' + @Sql1 + ' FROM ##RESULTADO FOR JSON PATH)) AS datos FOR JSON PATH';
 
 					EXEC sp_executesql @Sql1;
+
+					DROP TABLE #DatosRegistros1
+					DROP TABLE  #TIPODATO1
 				END
 				
 			DROP TABLE ##RESULTADO
@@ -260,7 +335,7 @@ BEGIN
 		DECLARE @nomPrincipalC2 varchar(max)
 		
 		SELECT @nomPrincipalC2=nombre_table 
-		FROM #tablasC2 WHERE id = @secC2	
+		FROM #tablasC2 WHERE id = @secC2				
 
 		SELECT COLUMN_NAME
 				INTO #columnas2
@@ -287,6 +362,7 @@ BEGIN
 			
 			
 			SELECT @contC1=COUNT(*) FROM #migracionCodigo2
+			
 
 			WHILE @contC1 >=@secC1
 			BEGIN
@@ -330,14 +406,33 @@ BEGIN
 	
 				SET @nombreColumna1 = (select value from #NomColumna where ordinal=1)
 				SET @nombreColumna2 = (select value from #NomColumna where ordinal=2)
+			
+				IF (LEN(@codigoC2)>19)
+						SET @codigoC2 = 'CONVERT(datetime,'''+@codigoC2+''',121)'
+				ELSE
+					SET @codigoC2 = '''' + @codigoC2 + ''''
+
+				IF (LEN(@codigo2C2)>19)
+						SET @codigo2C2 = 'CONVERT(datetime,'''+@codigo2C2+''',121)'
+				ELSE
+					SET @codigo2C2 = '''' + @codigo2C2 + ''''
+								
 	
 				IF OBJECT_ID('tempdb..##RESULTADO2') IS NOT NULL
 				BEGIN	
 					IF (SELECT COUNT (1) FROM ##RESULTADO2)> 0
-					SET @CreateTABLEC2 =N'SELECT ' + @text2 +
-					' FROM ' + @nombreTableC2 + 
-					' WHERE '+ @nombreColumna1 +'= ''' + @codigoC2 + ''' AND ' + @nombreColumna2 + ' = ''' + @codigo2C2 + ''''	
-								
+					BEGIN
+						SET @CreateTABLEC2 =N'SELECT ' + @text2 +
+						' FROM ' + @nombreTableC2 + 
+						' WHERE '+ @nombreColumna1 +'= ' + @codigoC2 + ' AND ' + @nombreColumna2 + ' = ' + @codigo2C2 
+					END
+					ELSE
+					BEGIN
+						SET @CreateTABLEC2 =N'SELECT ' + @text2 + 
+						' FROM ' + @nombreTableC2 + 
+						' WHERE '+ @nombreColumna1 +'= ' + @codigoC2 + ' AND ' + @nombreColumna2 + ' = ' + @codigo2C2					
+					END
+
 					INSERT INTO ##RESULTADO2
 					EXECUTE sp_executeSQL @CreateTABLEC2
 				END	
@@ -347,15 +442,16 @@ BEGIN
 					SET @CreateTABLEC2 =N'SELECT ' + @text2 + 
 					' INTO ##RESULTADO2 ' +
 					' FROM ' + @nombreTableC2 + 
-					' WHERE '+ @nombreColumna1 +'= ''' + @codigoC2 + ''' AND ' + @nombreColumna2 + ' = ''' + @codigo2C2 + ''''	
-					PRINT @CreateTABLEC2
-					EXECUTE sp_executeSQL @CreateTABLEC2			
+					' WHERE '+ @nombreColumna1 +'= ' + @codigoC2 + ' AND ' + @nombreColumna2 + ' = ' + @codigo2C2 	
+				
+					EXECUTE sp_executeSQL @CreateTABLEC2
+					
 				END
-								
+
 				DROP TABLE #NomColumna
 				SET @secC1 +=1
 			END
-
+			
 			IF OBJECT_ID('tempdb..##RESULTADO2') IS NOT NULL
 			BEGIN
 				IF(SELECT COUNT(*) FROM ##RESULTADO2)>0
@@ -363,25 +459,66 @@ BEGIN
 					DECLARE @Columns2 NVARCHAR(MAX);
 					DECLARE @Sql2 NVARCHAR(MAX);								
 
-					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns2 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO2')) 
+					CREATE TABLE #DatosRegistros2(
+					id int identity(1,1),
+					columna varchar(max),
+					valorDefault varchar(max)
+					)
+					
+					SELECT ROW_NUMBER() OVER(ORDER BY a.name) as id,B.name AS tipo, a.name AS columna
+					INTO #TIPODATO2
+					FROM TempDB.SYS.COLUMNS a
+					INNER JOIN  TempDB.sys.types B ON a.user_type_id=B.user_type_id
+					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO2') AND is_identity = 0
 
-					SET @Sql2 = (SELECT 
-					STRING_AGG(				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS VARCHAR(MAX)) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
+					DECLARE @contTipo2 int = 0, @secTipo2 int = 1					
+		
+
+					SET @contTipo2 = (SELECT COUNT(*) FROM #TIPODATO2)
+					WHILE @contTipo2 >= @secTipo2
+					BEGIN
+						DECLARE @nombre2 varchar(max)='', @tipoDato2 varchar(max)='', @ValorDefault2 VARCHAR(MAX)=''
+						
+						SELECT 
+						@nombre2=columna,
+						@tipoDato2=tipo 
+						FROM #TIPODATO2 WHERE id = @secTipo2
+						
+						IF @@ROWCOUNT = 0
+						BREAK;
+
+						IF @TipoDato2 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							SET @ValorDefault2 = '0';  -- Valor por defecto numérico
+						ELSE IF @TipoDato2 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
+							SET @ValorDefault2 = '''''' ;  -- Valor por defecto texto
+						ELSE IF @TipoDato2 IN ('datetime', 'date', 'time')  -- Tipos de fecha
+							SET @ValorDefault2 = '''1900-01-01''' ;  -- Valor por defecto fecha
+						ELSE
+							SET @ValorDefault2 = '''Desconocido''' ;  -- Valor por defecto genérico
+				
+						
+						insert into #DatosRegistros2 (columna,valorDefault)
+												VALUES(@nombre2,@ValorDefault2)
+
+						SET @secTipo2 +=1
+					END
+
+
+					 SET @Sql2 = (SELECT STRING_AGG(
+				
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(columna) AS varchar(MAX)) + '), '+ valorDefault +') AS ' +CAST(QUOTENAME(columna) AS varchar(MAX)), 
 						', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO2')) 
+					FROM #DatosRegistros2)
 
-					PRINT @Sql2
-
-					-- Ejecutar la consulta dinámica y obtener el resultado en formato JSON
+				
 					SET @Sql2 ='SELECT '''+ @nomPrincipalC2 + ''' AS tabla, '+				
 					'((SELECT  ' + @Sql2 + ' FROM ##RESULTADO2 FOR JSON PATH)) AS datos FOR JSON PATH';
-					
+				
+
 					EXEC sp_executesql @Sql2;
+
+					DROP TABLE #DatosRegistros2
+					DROP TABLE  #TIPODATO2
 				END
 				DROP TABLE ##RESULTADO2
 			END
@@ -408,7 +545,6 @@ BEGIN
 	
 	SET @contC3 = (SELECT COUNT (*) FROM #tablasC3)	
 
-	
 
 	WHILE @contC3 >= @secC3
 	BEGIN
@@ -416,8 +552,6 @@ BEGIN
 		
 		SELECT @nomPrincipalC3=nombre_table 
 		FROM #tablasC3 WHERE id = @secC3
-
-
 		
 		SELECT COLUMN_NAME
 		INTO #columnas3
@@ -446,7 +580,6 @@ BEGIN
 
 
 			SELECT @contCod3=COUNT(*) FROM #migracionCodigo3
-
 			
 			WHILE @contCod3 >=@secCod3
 			BEGIN
@@ -492,7 +625,6 @@ BEGIN
 				1,
 				''
 				))
-
 				
 
 				SELECT *
@@ -503,13 +635,32 @@ BEGIN
 				SET @nombreCol2Cod3 = (select value from #NomColumna3 where ordinal=2)
 				SET @nombreCol3Cod3 = (select value from #NomColumna3 where ordinal=3)
 
+				IF (LEN(@codigoC3)>19)
+						SET @codigoC3 = 'CONVERT(datetime,'''+@codigoC3+''',121)'
+				ELSE
+					SET @codigoC3 = '''' + @codigoC3 + ''''
+
+				IF (LEN(@codigo2C3)>19)
+						SET @codigo2C3 = 'CONVERT(datetime,'''+@codigo2C3+''',121)'
+				ELSE
+					SET @codigo2C3 = '''' + @codigo2C3 + ''''
+
+
+				IF (LEN(@codigo3C3)>19)
+						SET @codigo3C3 = 'CONVERT(datetime,'''+@codigo3C3+''',121)'
+				ELSE
+					SET @codigo3C3 = '''' + @codigo3C3 + ''''
+
+
+
 				IF OBJECT_ID('tempdb..##RESULTADO3') IS NOT NULL
-				BEGIN	
+				BEGIN									
+					
 					IF (SELECT COUNT (1) FROM ##RESULTADO3)> 0
 					SET @CreateTABLEC3 =N'SELECT ' + @text3 + 
 					' FROM ' + @nombreTableC3 + 
-					' WHERE '+ @nombreCol1Cod3 +'= ''' + @codigoC3 + ''' AND ' + @nombreCol2Cod3 + ' = ''' + @codigo2C3 + ''''+
-					' AND ' + @nombreCol3Cod3 + ' = ''' + @codigo3C3 + ''''
+					' WHERE '+ @nombreCol1Cod3 +'= ' + @codigoC3 + ' AND ' + @nombreCol2Cod3 + ' = ' + @codigo2C3 + 
+					' AND ' + @nombreCol3Cod3 + ' = ' + @codigo3C3
 					
 				
 					INSERT INTO ##RESULTADO3
@@ -523,16 +674,17 @@ BEGIN
 					SET @CreateTABLEC3 =N'SELECT ' + @text3 +
 					' INTO ##RESULTADO3 ' +  
 					' FROM ' + @nombreTableC3 + 
-					' WHERE '+ @nombreCol1Cod3 +'= ''' + @codigoC3 + ''' AND ' + @nombreCol2Cod3 + ' = ''' + @codigo2C3 + ''''+
-					' AND ' + @nombreCol3Cod3 + ' = ''' + @codigo3C3 + ''''										
+					' WHERE '+ @nombreCol1Cod3 +'= ' + @codigoC3 + ' AND ' + @nombreCol2Cod3 + ' = ' + @codigo2C3 +
+					' AND ' + @nombreCol3Cod3 + ' = ' + @codigo3C3									
 
 					EXECUTE sp_executeSQL @CreateTABLEC3
-				
+					
 				END
 								
 				DROP TABLE #NomColumna3
 				SET @secCod3 +=1
 			END
+
 
 			IF OBJECT_ID('tempdb..##RESULTADO3') IS NOT NULL
 			BEGIN
@@ -542,23 +694,64 @@ BEGIN
 				DECLARE @Columns3 NVARCHAR(MAX);
 				DECLARE @Sql3 NVARCHAR(MAX);						
 
-				-- Obtener los nombres de las columnas de la tabla especificada
-				SET @Columns3 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
-				FROM TempDB.SYS.COLUMNS 
-				WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO3')) 
+				CREATE TABLE #DatosRegistros3(
+					id int identity(1,1),
+					columna varchar(max),
+					valorDefault varchar(max)
+					)
+					
+					SELECT ROW_NUMBER() OVER(ORDER BY a.name) as id,B.name AS tipo, a.name AS columna
+					INTO #TIPODATO3
+					FROM TempDB.SYS.COLUMNS a
+					INNER JOIN  TempDB.sys.types B ON a.user_type_id=B.user_type_id
+					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO3') AND is_identity = 0
 
-				SET @Sql3 = (SELECT STRING_AGG(
+					DECLARE @contTipo3 int = 0, @secTipo3 int = 1
+
+					SET @contTipo3 = (SELECT COUNT(*) FROM #TIPODATO3)
+					WHILE @contTipo3 >= @secTipo3
+					BEGIN
+						DECLARE @nombre3 varchar(max)='', @tipoDato3 varchar(max)='', @ValorDefault3 VARCHAR(MAX)=''
+						
+						SELECT 
+						@nombre3=columna,
+						@tipoDato3=tipo 
+						FROM #TIPODATO3 WHERE id = @secTipo3
+						
+						IF @@ROWCOUNT = 0
+						BREAK;
+
+						IF @TipoDato3 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							SET @ValorDefault3 = '0';  -- Valor por defecto numérico
+						ELSE IF @TipoDato3 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
+							SET @ValorDefault3 = '''''' ;  -- Valor por defecto texto
+						ELSE IF @TipoDato3 IN ('datetime', 'date', 'time')  -- Tipos de fecha
+							SET @ValorDefault3 = '''1900-01-01''' ;  -- Valor por defecto fecha
+						ELSE
+							SET @ValorDefault3 = '''Desconocido''' ;  -- Valor por defecto genérico
 				
-					'ISNULL( CONVERT(VARCHAR(MAX), ' + QUOTENAME(NAME) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
-					', ') 
-				FROM TempDB.SYS.COLUMNS 
-				WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO3')) 
+						
+						insert into #DatosRegistros3 (columna,valorDefault)
+												VALUES(@nombre3,@ValorDefault3)
 
-				-- Ejecutar la consulta dinámica y obtener el resultado en formato JSON
-				SET @Sql3 ='SELECT '''+ @nomPrincipalC3 + ''' AS tabla, '+				
-				'((SELECT  ' + @Sql3 + ' FROM ##RESULTADO3 FOR JSON PATH)) AS datos FOR JSON PATH';
+						SET @secTipo3 +=1
+					END
 
-				EXEC sp_executesql @Sql3;
+
+					 SET @Sql3 = (SELECT STRING_AGG(
+				
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(columna) AS varchar(MAX)) + '), '+ valorDefault +') AS ' +CAST(QUOTENAME(columna) AS varchar(MAX)), 
+						', ') 
+					FROM #DatosRegistros3)
+
+				
+					SET @Sql3 ='SELECT '''+ @nomPrincipalC3 + ''' AS tabla, '+				
+					'((SELECT  ' + @Sql3 + ' FROM ##RESULTADO3 FOR JSON PATH)) AS datos FOR JSON PATH';
+
+					EXEC sp_executesql @Sql3;
+
+					DROP TABLE #DatosRegistros3
+					DROP TABLE  #TIPODATO3
 				END				
 				DROP TABLE ##RESULTADO3
 			END
@@ -682,14 +875,34 @@ BEGIN
 				SET @nombreCol3Cod4 = (select value from #NomColumna4 where ordinal=3)
 				SET @nombreCol4Cod4 = (select value from #NomColumna4 where ordinal=4)
 				
+				IF (LEN(@codigoC4)>19)
+						SET @codigoC4 = 'CONVERT(datetime,'''+@codigoC4+''',121)'
+				ELSE
+					SET @codigoC4 = '''' + @codigoC4 + ''''
+
+				IF (LEN(@codigo4C2)>19)
+						SET @codigo4C2 = 'CONVERT(datetime,'''+@codigo4C2+''',121)'
+				ELSE
+					SET @codigo4C2 = '''' + @codigo4C2 + ''''
+
+
+				IF (LEN(@codigo4C3)>19)
+						SET @codigo4C3 = 'CONVERT(datetime,'''+@codigo4C3+''',121)'
+				ELSE
+					SET @codigo4C3 = '''' + @codigo4C3 + ''''
+
+				IF (LEN(@codigo4C4)>19)
+					SET @codigo4C4 = 'CONVERT(datetime,'''+@codigo4C4+''',121)'
+				ELSE
+					SET @codigo4C4 = '''' + @codigo4C4 + ''''
 
 				IF OBJECT_ID('tempdb..##RESULTADO4') IS NOT NULL
 				BEGIN
 					IF (SELECT COUNT (1) FROM ##RESULTADO4)> 0
 					SET @CreateTABLEC4 =N'SELECT ' + @text4 + 
 					' FROM ' + @nombreTableC4 + 
-					' WHERE '+ @nombreCol1Cod4 +'= ''' + @codigoC4 + ''' AND ' + @nombreCol2Cod4 + ' = ''' + @codigo4C2 + ''''+
-					' AND ' + @nombreCol3Cod4 + ' = ''' + @codigo4C3 + '''' + ' AND ' +@nombreCol3Cod4 + ' = '''+ @codigo4C3 + '''' 					
+					' WHERE '+ @nombreCol1Cod4 +'= ' + @codigoC4 + ' AND ' + @nombreCol2Cod4 + ' = ' + @codigo4C2 + 					
+					' AND ' + @nombreCol3Cod4 + ' = ' + @codigo4C3 + ' AND ' +@nombreCol3Cod4 + ' = '+ @codigo4C4 					
 
 
 					INSERT INTO ##RESULTADO4
@@ -704,8 +917,8 @@ BEGIN
 					SET @CreateTABLEC4 =N'SELECT ' + @text4 +
 					' INTO ##RESULTADO4 ' +  
 					' FROM ' + @nombreTableC4  +
-					' WHERE '+ @nombreCol1Cod4 +'= ''' + @codigoC4 + ''' AND ' + @nombreCol2Cod4 + ' = ''' + @codigo4C2 + '''' +
-					' AND ' + @nombreCol3Cod4 + ' = ''' + @codigo4C3 + '''' + ' AND ' +@nombreCol3Cod4 + ' = '''+ @codigo4C3 + '''' 			
+					' WHERE '+ @nombreCol1Cod4 +'= ' + @codigoC4 + ' AND ' + @nombreCol2Cod4 + ' = ' + @codigo4C2 +
+					' AND ' + @nombreCol3Cod4 + ' = ' + @codigo4C3 + ' AND ' +@nombreCol3Cod4 + ' = '+ @codigo4C3 			
 						
 					EXECUTE sp_executeSQL @CreateTABLEC4
 				
@@ -722,23 +935,63 @@ BEGIN
 					DECLARE @Columns4 NVARCHAR(MAX);
 					DECLARE @Sql4 NVARCHAR(MAX);					
 
-					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns4 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO4')) 
+					CREATE TABLE #DatosRegistros4(
+					id int identity(1,1),
+					columna varchar(max),
+					valorDefault varchar(max)
+					)
+					
+					SELECT ROW_NUMBER() OVER(ORDER BY a.name) as id,B.name AS tipo, a.name AS columna
+					INTO #TIPODATO4
+					FROM TempDB.SYS.COLUMNS a
+					INNER JOIN  TempDB.sys.types B ON a.user_type_id=B.user_type_id
+					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO4') AND is_identity = 0
 
-					SET @Sql4 = (SELECT STRING_AGG(
+					DECLARE @contTipo4 int = 0, @secTipo4 int = 1
+
+					SET @contTipo4 = (SELECT COUNT(*) FROM #TIPODATO4)
+					WHILE @contTipo4 >= @secTipo4 
+					BEGIN
+						DECLARE @nombre4 varchar(max)='', @tipoDato4 varchar(max)='', @ValorDefault4 VARCHAR(MAX)=''
+						
+						SELECT 
+						@nombre4=columna,
+						@tipoDato4=tipo 
+						FROM #TIPODATO4 WHERE id = @secTipo4
+						
+						IF @@ROWCOUNT = 0
+						BREAK;
+
+						IF @TipoDato4 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							SET @ValorDefault4 = '0';  -- Valor por defecto numérico
+						ELSE IF @TipoDato4 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
+							SET @ValorDefault4 = '''''' ;  -- Valor por defecto texto
+						ELSE IF @TipoDato4 IN ('datetime', 'date', 'time')  -- Tipos de fecha
+							SET @ValorDefault4 = '''1900-01-01''' ;  -- Valor por defecto fecha
+						ELSE
+							SET @ValorDefault4 = '''Desconocido''' ;  -- Valor por defecto genérico
 				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS varchar(MAX)) + '), ''0'') AS ' +CAST(QUOTENAME(NAME) AS varchar(MAX)), 
-						', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO4')) 
+						
+						insert into #DatosRegistros4 (columna,valorDefault)
+												VALUES(@nombre4,@ValorDefault4)
 
-					-- Ejecutar la consulta dinámica y obtener el resultado en formato JSON
+						SET @secTipo4 +=1
+					END
+
+
+					 SET @Sql4 = (SELECT STRING_AGG(
+				
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(columna) AS varchar(MAX)) + '), '+ valorDefault +') AS ' +CAST(QUOTENAME(columna) AS varchar(MAX)), 
+						', ') 
+					FROM #DatosRegistros4)
+
+				
 					SET @Sql4 ='SELECT '''+ @nomPrincipalC4 + ''' AS tabla, '+				
 					'((SELECT  ' + @Sql4 + ' FROM ##RESULTADO4 FOR JSON PATH)) AS datos FOR JSON PATH';
 
 					EXEC sp_executesql @Sql4;
+					DROP TABLE #DatosRegistros4
+					DROP TABLE  #TIPODATO4
 				END		
 				DROP TABLE ##RESULTADO4
 			END
@@ -798,7 +1051,6 @@ BEGIN
 			FROM temp_registroMigracion 
 			WHERE [status]=1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS NOT NULL AND codigo4 IS NOT NULL AND codigo5 IS NOT NULL 
 			AND TIPO = @tipoU AND nombre_table= @nomPrincipalC5
-
 
 			SELECT @contCod5=COUNT(*) FROM #migracionCodigo5
 
@@ -864,6 +1116,29 @@ BEGIN
 				SET @nombreCol3Cod5 = (select value from #NomColumna5 where ordinal=3)
 				SET @nombreCol4Cod5 = (select value from #NomColumna5 where ordinal=4)
 				SET @nombreCol5Cod5 = (select value from #NomColumna5 where ordinal=5)
+
+
+				IF (LEN(@codigoC5)>19)
+						SET @codigoC5 = 'CONVERT(datetime,'''+@codigoC5+''',121)'
+				ELSE
+					SET @codigoC5 = '''' + @codigoC5 + ''''
+
+				IF (LEN(@codigo5C2)>19)
+						SET @codigo5C2 = 'CONVERT(datetime,'''+@codigo5C2+''',121)'
+				ELSE
+					SET @codigo5C2 = '''' + @codigo5C2 + ''''
+
+
+				IF (LEN(@codigo5C3)>19)
+						SET @codigo5C3 = 'CONVERT(datetime,'''+@codigo5C3+''',121)'
+				ELSE
+					SET @codigo5C3 = '''' + @codigo5C3 + ''''
+
+				IF (LEN(@codigo5C4)>19)
+					SET @codigo5C4 = 'CONVERT(datetime,'''+@codigo5C4+''',121)'
+				ELSE
+					SET @codigo5C4 = '''' + @codigo5C4 + ''''
+
 				
 
 				IF OBJECT_ID('tempdb..##RESULTADO5') IS NOT NULL
@@ -871,12 +1146,13 @@ BEGIN
 				IF (SELECT COUNT (*) FROM ##RESULTADO5)> 0
 					SET @CreateTABLEC5 =N'SELECT ' + @text5 + 
 					' FROM ' + @nombreTableC5 + 
-					' WHERE '+ @nombreCol1Cod5 +'= ''' + @codigoC5 + ''' AND ' + @nombreCol2Cod5 + ' = ''' + @codigo5C2 + ''''+
-					' AND ' + @nombreCol3Cod5 + ' = ''' + @codigo5C3 + '''' + ' AND ' +@nombreCol4Cod5 + ' = '''+ @codigo5C4 + '''' +
-					' AND ' +@nombreCol5Cod5 + ' = '''+ @codigo5C5 + ''''
+					' WHERE '+ @nombreCol1Cod5 +'= ' + @codigoC5 + ' AND ' + @nombreCol2Cod5 + ' = ' + @codigo5C2 +
+					' AND ' + @nombreCol3Cod5 + ' = ' + @codigo5C3 + ' AND ' +@nombreCol4Cod5 + ' = '+ @codigo5C4 +
+					' AND ' +@nombreCol5Cod5 + ' = '+ @codigo5C5
 					
 					INSERT INTO ##RESULTADO5
 					EXECUTE sp_executeSQL @CreateTABLEC5
+
 				END	
 
 				IF OBJECT_ID('tempdb..##RESULTADO5') IS NULL
@@ -885,11 +1161,11 @@ BEGIN
 					SET @CreateTABLEC5 =N'SELECT ' + @text5 + 
 					' INTO ##RESULTADO5 ' +  
 					' FROM ' + @nombreTableC5 + 
-					' WHERE '+ @nombreCol1Cod5 +'= ''' + @codigoC5 + ''' AND ' + @nombreCol2Cod5 + ' = ''' + @codigo5C2 + ''''+
-					' AND ' + @nombreCol3Cod5 + ' = ''' + @codigo5C3 + '''' + ' AND ' +@nombreCol4Cod5 + ' = '''+ @codigo5C4 + '''' +
-					' AND ' +@nombreCol5Cod5 + ' = '''+ @codigo5C5 + ''''
-					
-					EXECUTE sp_executeSQL @CreateTABLEC5											
+					' WHERE '+ @nombreCol1Cod5 +'= ' + @codigoC5 + ' AND ' + @nombreCol2Cod5 + ' = ' + @codigo5C2 + 
+					' AND ' + @nombreCol3Cod5 + ' = ' + @codigo5C3  + ' AND ' +@nombreCol4Cod5 + ' = '+ @codigo5C4 +
+					' AND ' +@nombreCol5Cod5 + ' = '+ @codigo5C5
+					EXECUTE sp_executeSQL @CreateTABLEC5
+					PRINT @CreateTABLEC5
 				END
 				
 				
@@ -903,28 +1179,68 @@ BEGIN
 				IF(SELECT COUNT(*) FROM ##RESULTADO5)>0
 				BEGIN
 					DECLARE @Columns NVARCHAR(MAX);
-					DECLARE @Sql NVARCHAR(MAX);								
+					DECLARE @Sql NVARCHAR(MAX);		
 
+					CREATE TABLE #DatosRegistros(
+					id int identity(1,1),
+					columna varchar(max),
+					valorDefault varchar(max)
+					)
+					
+					SELECT ROW_NUMBER() OVER(ORDER BY a.name) as id,B.name AS tipo, a.name AS columna
+					INTO #TIPODATO
+					FROM TempDB.SYS.COLUMNS a
+					INNER JOIN  TempDB.sys.types B ON a.user_type_id=B.user_type_id
+					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO5') AND is_identity = 0
 
-					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO5')) 
+					DECLARE @contTipo int = 0, @secTipo int = 1
 
-					SET @Sql = (SELECT STRING_AGG(
+					SET @contTipo = (SELECT COUNT(*) FROM #TIPODATO)
+					WHILE @contTipo >= @secTipo 
+					BEGIN
+						DECLARE @nombre varchar(max)='', @tipoDato varchar(max)='', @ValorDefault VARCHAR(MAX)=''
+						
+						SELECT 
+						@nombre=columna,
+						@tipoDato=tipo 
+						FROM #TIPODATO WHERE id = @secTipo
+						
+						IF @@ROWCOUNT = 0
+						BREAK;
+
+						IF @TipoDato IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							SET @ValorDefault = '0';  -- Valor por defecto numérico
+						ELSE IF @TipoDato IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
+							SET @ValorDefault = '''''' ;  -- Valor por defecto texto
+						ELSE IF @TipoDato IN ('datetime', 'date', 'time')  -- Tipos de fecha
+							SET @ValorDefault = '''1900-01-01''' ;  -- Valor por defecto fecha
+						ELSE
+							SET @ValorDefault = '''Desconocido''' ;  -- Valor por defecto genérico
 				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS varchar(MAX)) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
-						', ') 
-					FROM TempDB.SYS.COLUMNS 
-					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO5')) 
+						
+						insert into #DatosRegistros (columna,valorDefault)
+												VALUES(@nombre,@ValorDefault)
 
-					-- Ejecutar la consulta dinámica y obtener el resultado en formato JSON
+						SET @secTipo +=1
+					END
+
+
+					 SET @Sql = (SELECT STRING_AGG(
+				
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(columna) AS varchar(MAX)) + '), '+ valorDefault +') AS ' +CAST(QUOTENAME(columna) AS varchar(MAX)), 
+						', ') 
+					FROM #DatosRegistros)
+
+				
 					SET @Sql ='SELECT '''+ @nomPrincipalC5 + ''' AS tabla, '+				
 					'((SELECT  ' + @Sql + ' FROM ##RESULTADO5 FOR JSON PATH)) AS datos FOR JSON PATH';
 
 					EXEC sp_executesql @Sql;
+					DROP TABLE #DatosRegistros
+					DROP TABLE  #TIPODATO
+					
 				END
-								
+				
 				DROP TABLE ##RESULTADO5
 
 			END
@@ -1051,11 +1367,15 @@ BEGIN
 
 				SET @nombreCol1CodU1 = (select value from #NomColumnaU1 where ordinal=1)
 
-				SET @textU1 = REPLACE(@textU1,@nombreCol1CodU1 +',','')
+				--SET @textU1 = REPLACE(@textU1,@nombreCol1CodU1 +',','')
 
 				INSERT INTO #camposWhere(NombreCampo1,codigo1)
 							VALUES(@nombreCol1CodU1,@codigoCU1)
 				
+				IF (LEN(@codigoCU1)>19)
+						SET @codigoCU1 = 'CONVERT(datetime,'''+@codigoCU1+''',121)'
+				ELSE
+					SET @codigoCU1 = '''' + @codigoCU1 + ''''
 
 
 				IF OBJECT_ID('tempdb..##RESULTADOU1') IS NOT NULL
@@ -1063,7 +1383,7 @@ BEGIN
 
 					SET @CreateTABLECU1 =N'SELECT ' + @textU1 + 
 					' FROM ' + @nombreTableCU1 + 
-					' WHERE '+ @nombreCol1CodU1 +'= ''' + @codigoCU1 + ''''
+					' WHERE '+ @nombreCol1CodU1 +'= ' + @codigoCU1
 
 					INSERT INTO ##RESULTADOU1
 					EXECUTE sp_executeSQL @CreateTABLECU1
@@ -1075,26 +1395,98 @@ BEGIN
 					SET @CreateTABLECU1 =N'SELECT ' + @textU1 + 
 					' INTO ##RESULTADOU1 ' +  
 					' FROM ' + @nombreTableCU1 + 
-					' WHERE '+ @nombreCol1CodU1 +'= ''' + @codigoCU1 + ''''		
+					' WHERE '+ @nombreCol1CodU1 +'= ' + @codigoCU1		
 
-					EXECUTE sp_executeSQL @CreateTABLECU1								
-					
-					
+					EXECUTE sp_executeSQL @CreateTABLECU1																		
 				END
 						
 				
 				DROP TABLE #NomColumnaU1
 				SET @secU1 = @secU1 +1
+		END					
+
+		IF OBJECT_ID('tempdb..##RESULTADOU1') IS NOT NULL
+		BEGIN
+			IF(SELECT COUNT(*) FROM ##RESULTADOU1)>0
+				BEGIN
+					DECLARE @ColumnsU NVARCHAR(MAX);
+					DECLARE @SqlU NVARCHAR(MAX);								
+
+					CREATE TABLE #DatosRegistrosU(
+					id int identity(1,1),
+					columna varchar(max),
+					valorDefault varchar(max)
+					)
+					
+					SELECT ROW_NUMBER() OVER(ORDER BY a.name) as id,B.name AS tipo, a.name AS columna
+					INTO #TIPODATOU
+					FROM TempDB.SYS.COLUMNS a
+					INNER JOIN  TempDB.sys.types B ON a.user_type_id=B.user_type_id
+					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADOU1') AND is_identity = 0
+
+					DECLARE @contTipoU1 int = 0, @secTipoU1 int = 1
+
+					SET @contTipoU1 = (SELECT COUNT(*) FROM #TIPODATOU)
+					WHILE @contTipoU1 >= @secTipoU1
+					BEGIN
+						DECLARE @nombreU1 varchar(max)='', @tipoDatoU1 varchar(max)='', @ValorDefaultU1 VARCHAR(MAX)=''
+						
+						SELECT 
+						@nombreU1=columna,
+						@tipoDatoU1=tipo 
+						FROM #TIPODATOU WHERE id = @secTipoU1
+						
+						IF @@ROWCOUNT = 0
+						BREAK;
+
+						IF @TipoDatoU1 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							SET @ValorDefaultU1 = '0';  -- Valor por defecto numérico
+						ELSE IF @TipoDatoU1 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
+							SET @ValorDefaultU1 = '''''' ;  -- Valor por defecto texto
+						ELSE IF @TipoDatoU1 IN ('datetime', 'date', 'time')  -- Tipos de fecha
+							SET @ValorDefaultU1 = '''1900-01-01''' ;  -- Valor por defecto fecha
+						ELSE
+							SET @ValorDefaultU1 = '''Desconocido''' ;  -- Valor por defecto genérico
+				
+						
+						insert into #DatosRegistrosU (columna,valorDefault)
+												VALUES(@nombreU1,@ValorDefaultU1)
+
+						SET @secTipoU1 +=1
+					END
+
+					 SET @SqlU = (SELECT STRING_AGG(
+				
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(columna) AS varchar(MAX)) + '), '+ valorDefault +') AS ' +CAST(QUOTENAME(columna) AS varchar(MAX)), 
+						', ') 
+					FROM #DatosRegistrosU)
+			
+
+				
+					DECLARE @COLUMNAS1 varchar(max)=''
+
+					SET @COLUMNAS1 = (SELECT STRING_AGG(CAST(columna AS varchar(MAX)),', ') 
+					FROM #DatosRegistrosU)
+												
+					SET @SqlU = 'SELECT '''+ @nomPrincipalCU1 + ''' AS tabla, ' 
+					+ '(SELECT codigo1 AS ' + @nombreCol1CodU1 
+					+' from ##RESULTADOU1 a'
+					+' inner join #camposWhere b on a.'+@nombreCol1CodU1+' = b.codigo1 '
+					+' group by codigo1 FOR JSON PATH) AS filtros,'				
+					+	'((SELECT '+ @textU1
+					+ ' from ##RESULTADOU1 a'
+					+' inner join #camposWhere b on a.'+@nombreCol1CodU1+' = b.codigo1 '
+					+' GROUP BY ' + @COLUMNAS1 + ' FOR JSON PATH)) AS datos FOR JSON PATH';			
+
+					EXEC sp_executesql @SqlU;
+
+
+					DROP TABLE #DatosRegistrosU
+					DROP TABLE  #TIPODATOU
+				END
+				
+			DROP TABLE ##RESULTADOU1
 		END
-
-				DECLARE @SqlU NVARCHAR(MAX);	
-				SET @SqlU = 'SELECT '''+ @nomPrincipalCU1 + ''' AS tabla, ' 
-				+ '(SELECT codigo1 AS ' + @nombreCol1CodU1 + ' FROM #camposWhere FOR JSON PATH) AS filtros,'
-				+	'((SELECT * FROM ##RESULTADOU1 FOR JSON PATH)) AS datos FOR JSON PATH';
-
-				EXEC sp_executesql @SqlU;
-	
-				DROP TABLE ##RESULTADOU1
 
 			TRUNCATE TABLE #camposWhere
 			TRUNCATE TABLE #migracionCodigoU1
@@ -1108,12 +1500,258 @@ BEGIN
 	END
 	
 	
-	--IF @codigoTipo = '2'
-	--BEGIN
-	--	SELECT  codigo,nombre_table,codigo2,codigo3,codigo4,codigo5,codigo6,observacion,[status] 
-	--	FROM temp_registroMigracion 
-	--	WHERE tipo = 'U' and [status] = 1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS  NULL AND codigo4 IS  NULL AND codigo5 IS  NULL
-	--END
+	IF @codigoTipo = '2'
+	BEGIN
+		
+
+		SELECT ROW_NUMBER() OVER(ORDER BY nombre_table) as id, nombre_table, tipo,REPLACE(observacion, ' ', '') AS observacion 
+		INTO #tablasCU2
+		FROM temp_registroMigracion 
+		WHERE tipo = 'U' and [status] = 1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS  NULL AND codigo4 IS  NULL AND codigo5 IS  NULL
+		GROUP BY nombre_table,tipo,observacion
+
+		DECLARE @contCU2 int =0, @secCU2 int =1
+	
+		SET @contCU2 = (SELECT COUNT (*) FROM #tablasCU2)
+	
+		WHILE @contCU2 >= @secCU2
+		BEGIN
+
+		DECLARE @nomPrincipalCU2 varchar(max)
+
+		SELECT @nomPrincipalCU2=nombre_table 
+		FROM #tablasCU2 WHERE id = @secCU2			
+
+		SELECT COLUMN_NAME
+				INTO #columnasU2
+				FROM INFORMATION_SCHEMA.COLUMNS
+				WHERE TABLE_SCHEMA = 'dbo'
+					and TABLE_NAME = @nomPrincipalCU2
+				ORDER BY ORDINAL_POSITION
+
+
+		IF (
+			SELECT count(observacion)
+			FROM #tablasCU2 
+			CROSS APPLY STRING_SPLIT(observacion, ',') 
+			where nombre_table = @nomPrincipalCU2
+			GROUP BY CONCAT_WS('',observacion,''),nombre_table
+		) = 2
+		BEGIN
+
+		DECLARE @contU2 int =0, @secU2 int =1
+
+
+		INSERT INTO #migracionCodigoU2(nombre_tabla,tipo,codigo,codigo2,observacion,codigoMigracion)
+		SELECT  nombre_table, tipo,codigo,codigo2,REPLACE(observacion, ' ', '') AS observacion,id
+		FROM temp_registroMigracion 
+		WHERE [status]=1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS  NULL AND codigo4 IS  NULL AND codigo5 IS  NULL
+		AND TIPO = @tipoU AND nombre_table= @nomPrincipalCU2
+	
+		
+		SELECT @contU2=COUNT(*) FROM #migracionCodigoU2
+
+		DECLARE @tipoCU2 varchar(5)='',
+		@nombreTableCU2 varchar(200)='',
+		@observacionCU2 varchar(200)='',
+		@codigoCU2 varchar(200)='',	
+		@codigoCU22 varchar(200)='',	
+		@CreateTABLECU2 NVARCHAR(max) = N'',
+		@nombreCol1CodU2 varchar(max) = '',	
+		@nombreCol2CodU2 varchar(max) = '',	
+		@idCodMigracionU2 varchar(10) = ''
+
+		
+
+		WHILE @contU2 >=@secU2
+			BEGIN	
+				
+				SELECT 
+				@nombreTableCU2=nombre_tabla, 
+				@tipoCU2=tipo,
+				@codigoCU2=codigo,
+				@codigoCU22=codigo2,
+				@observacionCU2=observacion,
+				@idCodMigracionU2=codigoMigracion
+				FROM #migracionCodigoU2
+				WHERE id = @secU2 AND nombre_tabla = @nomPrincipalCU2
+				
+
+				IF @@ROWCOUNT = 0
+				BREAK;
+
+				
+
+				DECLARE @textU2 varchar(max)
+				SET @textU2 =(
+				SELECT
+				STUFF(
+				(
+					SELECT ',' + CAST(COLUMN_NAME AS VARCHAR(50))
+					FROM #columnasU2
+					WHERE COLUMN_NAME!='pk_Id'
+					FOR XML PATH('')
+				),
+				1,
+				1,
+				''
+				))
+
+
+				SELECT *
+				INTO #NomColumnaU2
+				FROM STRING_SPLIT(@observacionCU2, ',',1)
+
+				SET @nombreCol1CodU2 = (select value from #NomColumnaU2 where ordinal=1)
+				SET @nombreCol2CodU2 = (select value from #NomColumnaU2 where ordinal=2)						
+				
+
+				INSERT INTO #camposWhere(NombreCampo1,codigo1,NombreCampo2,codigo2)
+							VALUES(@nombreCol1CodU2,@codigoCU2,@nombreCol2CodU2,@codigoCU22)				
+
+
+				
+				IF (LEN(@codigoCU2)>19)
+						SET @codigoCU2 = 'CONVERT(datetime,'''+@codigoCU2+''',121)'
+				ELSE
+					SET @codigoCU2 = '''' + @codigoCU2 + ''''
+				
+				IF (LEN(@codigoCU22)>19)
+						SET @codigoCU22 = 'CONVERT(datetime,'''+@codigoCU22+''',121)'
+				ELSE
+					SET @codigoCU22 = '''' + RTRIM(LTRIM(@codigoCU22)) + ''''
+
+			
+
+				IF OBJECT_ID('tempdb..##RESULTADOU2') IS NOT NULL
+				BEGIN		
+					IF (SELECT COUNT(1) ##RESULTADOU2) > 0
+					BEGIN
+					SET @CreateTABLECU2 =N'SELECT ' + @textU2 + 
+					' FROM ' + @nombreTableCU2 + 
+					' WHERE '+ @nombreCol1CodU2 +'= ' + @codigoCU2 + ' AND ' + 	@nombreCol2CodU2 + ' = '+ @codigoCU22	
+					END
+					ELSE
+					BEGIN
+						SET @CreateTABLECU2 =N'SELECT ' + @textU2 + 					
+						' FROM ' + @nombreTableCU2 + 
+						' WHERE '+ @nombreCol1CodU2 +'= ' + @codigoCU2 + ' AND ' + 	@nombreCol2CodU2 + ' = '+ @codigoCU22
+					END
+
+					PRINT @CreateTABLECU2
+					INSERT INTO ##RESULTADOU2
+					EXECUTE sp_executeSQL @CreateTABLECU2
+				END	
+
+				IF OBJECT_ID('tempdb..##RESULTADOU2') IS NULL
+				BEGIN		
+
+					SET @CreateTABLECU2 =N'SELECT ' + @textU2 + 
+					' INTO ##RESULTADOU2 ' +  
+					' FROM ' + @nombreTableCU2 + 
+					' WHERE '+ @nombreCol1CodU2 +'= ' + @codigoCU2 + ' AND ' + 	@nombreCol2CodU2 + ' = '+ @codigoCU22	
+					
+					EXECUTE sp_executeSQL @CreateTABLECU2				
+				END
+										
+				DROP TABLE #NomColumnaU2
+				SET @secU2 = @secU2 +1
+		END		
+		
+			IF OBJECT_ID('tempdb..##RESULTADOU2') IS NOT NULL
+			BEGIN
+				IF(SELECT COUNT(*) FROM ##RESULTADOU2)>0
+					BEGIN
+						DECLARE @ColumnsU2 NVARCHAR(MAX);
+						DECLARE @SqlU2 NVARCHAR(MAX);								
+
+						CREATE TABLE #DatosRegistrosU2(
+						id int identity(1,1),
+						columna varchar(max),
+						valorDefault varchar(max)
+						)
+					
+						SELECT ROW_NUMBER() OVER(ORDER BY a.name) as id,B.name AS tipo, a.name AS columna
+						INTO #TIPODATOU2
+						FROM TempDB.SYS.COLUMNS a
+						INNER JOIN  TempDB.sys.types B ON a.user_type_id=B.user_type_id
+						WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADOU2') AND is_identity = 0
+				
+
+						DECLARE @contTipoU2 int = 0, @secTipoU2 int = 1
+
+						SET @contTipoU2 = (SELECT COUNT(*) FROM #TIPODATOU2)
+						WHILE @contTipoU2 >= @secTipoU2
+						BEGIN
+							DECLARE @nombreU2 varchar(max)='', @tipoDatoU2 varchar(max)='', @ValorDefaultU2 VARCHAR(MAX)=''
+						
+							SELECT 
+							@nombreU2=columna,
+							@tipoDatoU2=tipo 
+							FROM #TIPODATOU2 
+							WHERE id = @secTipoU2
+						
+							IF @@ROWCOUNT = 0
+							BREAK;
+
+							IF @TipoDatoU2 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+								SET @ValorDefaultU2 = '0';  -- Valor por defecto numérico
+							ELSE IF @TipoDatoU2 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
+								SET @ValorDefaultU2 = '''''' ;  -- Valor por defecto texto
+							ELSE IF @TipoDatoU2 IN ('datetime', 'date', 'time')  -- Tipos de fecha
+								SET @ValorDefaultU2 = '''1900-01-01''' ;  -- Valor por defecto fecha
+							ELSE
+								SET @ValorDefaultU2 = '''Desconocido''' ;  -- Valor por defecto genérico
+				
+						
+							insert into #DatosRegistrosU2 (columna,valorDefault)
+													VALUES(@nombreU2,@ValorDefaultU2)
+
+							SET @secTipoU2 +=1
+						END
+
+						SET @SqlU2 = (SELECT STRING_AGG(
+				
+							'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(columna) AS varchar(MAX)) + '), '+ valorDefault +') AS ' +CAST(QUOTENAME(columna) AS varchar(MAX)), 
+							', ') 
+						FROM #DatosRegistrosU2)
+
+						DECLARE @COLUMNAS varchar(max)=''
+
+						SET @COLUMNAS = (SELECT STRING_AGG(CAST(columna AS varchar(MAX)),', ') 
+						FROM #DatosRegistrosU2)
+												
+					
+				
+						SET @SqlU2 = 'SELECT '''+ @nomPrincipalCU2 + ''' AS tabla, ' 
+						+ '(SELECT codigo1 AS ' + @nombreCol1CodU2 + ', codigo2 AS ' + @nombreCol2CodU2 
+						+' from ##RESULTADOU2 a'
+						+' inner join #camposWhere b on a.'+@nombreCol1CodU2+' = b.codigo1  AND  a.' + @nombreCol2CodU2 +' = b.codigo2'
+						+' group by codigo1,codigo2 FOR JSON PATH) AS filtros,'				
+						+	'((SELECT '+ @textU2 
+						+ ' from ##RESULTADOU2 a'
+						+' inner join #camposWhere b on a.'+@nombreCol1CodU2+' = b.codigo1  AND  a.' + @nombreCol2CodU2 +' = b.codigo2'
+						+' GROUP BY ' + @COLUMNAS + ' FOR JSON PATH)) AS datos FOR JSON PATH';						
+
+
+						EXEC sp_executesql @SqlU2;
+						
+						DROP TABLE #DatosRegistrosU2
+						DROP TABLE  #TIPODATOU2
+					END				
+			END
+
+			DROP TABLE ##RESULTADOU2
+			TRUNCATE TABLE #camposWhere
+			TRUNCATE TABLE #migracionCodigoU2
+		END		
+		DROP TABLE #columnasU2
+		SET @secCU2 += 1
+		END
+		
+		
+	END
+	
 	
 	--IF @codigoTipo = '3'
 	--BEGIN
