@@ -21,6 +21,33 @@ BEGIN
 	PRINT 'CREATE TABLE temp_registroMigracion'
 END
 
+IF NOT (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'log_triggers'))
+BEGIN
+	CREATE TABLE log_triggers(
+		id int identity(1,1),
+		observacion varchar(max),
+		nombreTrigger varchar(max),
+		codStatus int,
+		fecha_registro datetime default(GETDATE())
+	)
+END
+
+IF NOT (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'temp_Migracion'))
+BEGIN
+	CREATE TABLE temp_Migracion(
+		id int identity(1,1),
+		codigo int,
+		tipo varchar(10),
+		nombreTabla varchar(max)
+	)
+END
+
 IF not exists
 (
 SELECT *

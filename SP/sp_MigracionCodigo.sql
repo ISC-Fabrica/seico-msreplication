@@ -6,7 +6,8 @@ ALTER PROCEDURE sp_MigracionCodigo
 @accion				char(3),
 @codigoU			varchar(50)		= NULL,
 @tipoU				varchar(5)		= NULL,
-@nombreTableU		varchar(max)	= NULL
+@nombreTableU		varchar(max)	= NULL,
+@codigoTipo			char(5)			= NULL				
 AS
 BEGIN
 SET NOCOUNT ON;
@@ -74,10 +75,33 @@ CREATE TABLE #migracionCodigo5(
 )
 
 
+CREATE TABLE #migracionCodigoU1(
+	id int identity(1,1),
+	codigoMigracion int,
+	nombre_tabla varchar(200),
+	tipo varchar(3),
+	codigo varchar(200),
+	observacion varchar(max)
+)
+
+CREATE TABLE #camposWhere(
+id int primary key identity(1,1),
+codigo1 varchar(100),
+codigo2 varchar(100),
+codigo3 varchar(100),
+codigo4 varchar(100),
+codigo5 varchar(100),
+NombreCampo1 varchar(200),
+NombreCampo2 varchar(200),
+NombreCampo3 varchar(200),
+NombreCampo4 varchar(200),
+NombreCampo5 varchar(200),
+)
+
+
 
 IF @accion='1'
 BEGIN
-
 	SELECT ROW_NUMBER() OVER(ORDER BY nombre_table) as id, nombre_table, tipo,observacion 
 	INTO #tablas
 	FROM temp_registroMigracion 
@@ -160,7 +184,8 @@ BEGIN
 				))
 	
 				IF OBJECT_ID('tempdb..##RESULTADO') IS NOT NULL
-				BEGIN			
+				BEGIN
+					IF (SELECT COUNT (1) FROM ##RESULTADO)> 0
 					SET @CreateTABLE =N'SELECT ' + @text + 
 					' FROM ' + @nombreTable + ' WHERE ' + @observacion+'=''' + @codigo + ''''	
 										
@@ -187,12 +212,12 @@ BEGIN
 					DECLARE @Sql1 NVARCHAR(MAX);								
 
 					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns1 = (SELECT STRING_AGG(QUOTENAME(NAME), ', ') 
+					SET @Columns1 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO')) 
 
 					SET @Sql1 = (SELECT STRING_AGG(				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + QUOTENAME(NAME) + '), '''') AS ' + QUOTENAME(NAME), 
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS varchar(MAX)) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
 						', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO')) 
@@ -307,7 +332,8 @@ BEGIN
 				SET @nombreColumna2 = (select value from #NomColumna where ordinal=2)
 	
 				IF OBJECT_ID('tempdb..##RESULTADO2') IS NOT NULL
-				BEGIN			
+				BEGIN	
+					IF (SELECT COUNT (1) FROM ##RESULTADO2)> 0
 					SET @CreateTABLEC2 =N'SELECT ' + @text2 +
 					' FROM ' + @nombreTableC2 + 
 					' WHERE '+ @nombreColumna1 +'= ''' + @codigoC2 + ''' AND ' + @nombreColumna2 + ' = ''' + @codigo2C2 + ''''	
@@ -338,13 +364,13 @@ BEGIN
 					DECLARE @Sql2 NVARCHAR(MAX);								
 
 					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns2 = (SELECT STRING_AGG(QUOTENAME(NAME), ', ') 
+					SET @Columns2 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO2')) 
 
 					SET @Sql2 = (SELECT 
 					STRING_AGG(				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS NVARCHAR(MAX)) + '), '''') AS ' + QUOTENAME(NAME), 
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS VARCHAR(MAX)) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
 						', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO2')) 
@@ -478,7 +504,8 @@ BEGIN
 				SET @nombreCol3Cod3 = (select value from #NomColumna3 where ordinal=3)
 
 				IF OBJECT_ID('tempdb..##RESULTADO3') IS NOT NULL
-				BEGIN			
+				BEGIN	
+					IF (SELECT COUNT (1) FROM ##RESULTADO3)> 0
 					SET @CreateTABLEC3 =N'SELECT ' + @text3 + 
 					' FROM ' + @nombreTableC3 + 
 					' WHERE '+ @nombreCol1Cod3 +'= ''' + @codigoC3 + ''' AND ' + @nombreCol2Cod3 + ' = ''' + @codigo2C3 + ''''+
@@ -516,13 +543,13 @@ BEGIN
 				DECLARE @Sql3 NVARCHAR(MAX);						
 
 				-- Obtener los nombres de las columnas de la tabla especificada
-				SET @Columns3 = (SELECT STRING_AGG(QUOTENAME(NAME), ', ') 
+				SET @Columns3 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
 				FROM TempDB.SYS.COLUMNS 
 				WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO3')) 
 
 				SET @Sql3 = (SELECT STRING_AGG(
 				
-					'ISNULL( CONVERT(VARCHAR(MAX), ' + QUOTENAME(NAME) + '), '''') AS ' + QUOTENAME(NAME), 
+					'ISNULL( CONVERT(VARCHAR(MAX), ' + QUOTENAME(NAME) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
 					', ') 
 				FROM TempDB.SYS.COLUMNS 
 				WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO3')) 
@@ -657,7 +684,8 @@ BEGIN
 				
 
 				IF OBJECT_ID('tempdb..##RESULTADO4') IS NOT NULL
-				BEGIN			
+				BEGIN
+					IF (SELECT COUNT (1) FROM ##RESULTADO4)> 0
 					SET @CreateTABLEC4 =N'SELECT ' + @text4 + 
 					' FROM ' + @nombreTableC4 + 
 					' WHERE '+ @nombreCol1Cod4 +'= ''' + @codigoC4 + ''' AND ' + @nombreCol2Cod4 + ' = ''' + @codigo4C2 + ''''+
@@ -695,13 +723,13 @@ BEGIN
 					DECLARE @Sql4 NVARCHAR(MAX);					
 
 					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns4 = (SELECT STRING_AGG(QUOTENAME(NAME), ', ') 
+					SET @Columns4 = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO4')) 
 
 					SET @Sql4 = (SELECT STRING_AGG(
 				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + QUOTENAME(NAME) + '), '''') AS ' + QUOTENAME(NAME), 
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS varchar(MAX)) + '), ''0'') AS ' +CAST(QUOTENAME(NAME) AS varchar(MAX)), 
 						', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO4')) 
@@ -723,7 +751,6 @@ BEGIN
 	DROP TABLE #migracionCodigo4
 	
 END
-
 
 IF @accion='5'
 BEGIN	
@@ -840,13 +867,14 @@ BEGIN
 				
 
 				IF OBJECT_ID('tempdb..##RESULTADO5') IS NOT NULL
-				BEGIN			
+				BEGIN		
+				IF (SELECT COUNT (*) FROM ##RESULTADO5)> 0
 					SET @CreateTABLEC5 =N'SELECT ' + @text5 + 
 					' FROM ' + @nombreTableC5 + 
 					' WHERE '+ @nombreCol1Cod5 +'= ''' + @codigoC5 + ''' AND ' + @nombreCol2Cod5 + ' = ''' + @codigo5C2 + ''''+
 					' AND ' + @nombreCol3Cod5 + ' = ''' + @codigo5C3 + '''' + ' AND ' +@nombreCol4Cod5 + ' = '''+ @codigo5C4 + '''' +
 					' AND ' +@nombreCol5Cod5 + ' = '''+ @codigo5C5 + ''''
-
+					
 					INSERT INTO ##RESULTADO5
 					EXECUTE sp_executeSQL @CreateTABLEC5
 				END	
@@ -859,9 +887,9 @@ BEGIN
 					' FROM ' + @nombreTableC5 + 
 					' WHERE '+ @nombreCol1Cod5 +'= ''' + @codigoC5 + ''' AND ' + @nombreCol2Cod5 + ' = ''' + @codigo5C2 + ''''+
 					' AND ' + @nombreCol3Cod5 + ' = ''' + @codigo5C3 + '''' + ' AND ' +@nombreCol4Cod5 + ' = '''+ @codigo5C4 + '''' +
-					' AND ' +@nombreCol5Cod5 + ' = '''+ @codigo5C5 + ''''												
-					EXECUTE sp_executeSQL @CreateTABLEC5								
-				
+					' AND ' +@nombreCol5Cod5 + ' = '''+ @codigo5C5 + ''''
+					
+					EXECUTE sp_executeSQL @CreateTABLEC5											
 				END
 				
 				
@@ -871,7 +899,7 @@ BEGIN
 
 			IF OBJECT_ID('tempdb..##RESULTADO5') IS NOT NULL
 			BEGIN
-				
+							
 				IF(SELECT COUNT(*) FROM ##RESULTADO5)>0
 				BEGIN
 					DECLARE @Columns NVARCHAR(MAX);
@@ -879,13 +907,13 @@ BEGIN
 
 
 					-- Obtener los nombres de las columnas de la tabla especificada
-					SET @Columns = (SELECT STRING_AGG(QUOTENAME(NAME), ', ') 
+					SET @Columns = (SELECT STRING_AGG(CAST(QUOTENAME(NAME) AS varchar(MAX)), ', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO5')) 
 
 					SET @Sql = (SELECT STRING_AGG(
 				
-						'ISNULL( CONVERT(VARCHAR(MAX), ' + QUOTENAME(NAME) + '), '''') AS ' + QUOTENAME(NAME), 
+						'ISNULL( CONVERT(VARCHAR(MAX), ' + CAST(QUOTENAME(NAME) AS varchar(MAX)) + '), ''0'') AS ' + CAST(QUOTENAME(NAME) AS varchar(MAX)), 
 						', ') 
 					FROM TempDB.SYS.COLUMNS 
 					WHERE OBJECT_ID=OBJECT_ID('TempDB.dbo.##RESULTADO5')) 
@@ -896,7 +924,6 @@ BEGIN
 
 					EXEC sp_executesql @Sql;
 				END
-
 								
 				DROP TABLE ##RESULTADO5
 
@@ -911,17 +938,203 @@ BEGIN
 	
 END
 
-
-
-
-
 IF @accion = 'U'
 BEGIN
+	
 
 		UPDATE temp_registroMigracion SET FechaModificacion = GETDATE(), status = 2
-		WHERE id = @codigoU AND tipo = @tipoU AND nombre_table=@nombreTableU AND status=1
+		WHERE tipo = @tipoU AND nombre_table=@nombreTableU AND status=1
+
 
 END
 
+IF @accion ='UC'
+BEGIN
+	IF @codigoTipo = '1'
+	BEGIN
+		
+
+		SELECT ROW_NUMBER() OVER(ORDER BY nombre_table) as id, nombre_table, tipo,REPLACE(observacion, ' ', '') AS observacion 
+		INTO #tablasCU1
+		FROM temp_registroMigracion 
+		WHERE tipo = 'U' and [status] = 1 AND codigo IS NOT NULL AND codigo2 IS NULL AND codigo3 IS  NULL AND codigo4 IS  NULL AND codigo5 IS  NULL
+		GROUP BY nombre_table,tipo,observacion
+
+		DECLARE @contCU1 int =0, @secCU1 int =1
+	
+		SET @contCU1 = (SELECT COUNT (*) FROM #tablasCU1)
+		
+		WHILE @contCU1 >= @secCU1
+		BEGIN
+
+		DECLARE @nomPrincipalCU1 varchar(max)
+
+		SELECT @nomPrincipalCU1=nombre_table 
+		FROM #tablasCU1 WHERE id = @secCU1			
+
+		SELECT COLUMN_NAME
+				INTO #columnasU1
+				FROM INFORMATION_SCHEMA.COLUMNS
+				WHERE TABLE_SCHEMA = 'dbo'
+					and TABLE_NAME = @nomPrincipalCU1
+				ORDER BY ORDINAL_POSITION
+
+
+		IF (
+			SELECT count(observacion)
+			FROM #tablasCU1 
+			CROSS APPLY STRING_SPLIT(observacion, ',') 
+			where nombre_table = @nomPrincipalCU1
+			GROUP BY CONCAT_WS('',observacion,''),nombre_table
+		) = 1
+		BEGIN
+
+		DECLARE @contU1 int =0, @secU1 int =1
+
+
+		INSERT INTO #migracionCodigoU1(nombre_tabla,tipo,codigo,observacion,codigoMigracion)
+		SELECT  nombre_table, tipo,codigo,REPLACE(observacion, ' ', '') AS observacion,id
+		FROM temp_registroMigracion 
+		WHERE [status]=1 AND codigo IS NOT NULL AND codigo2 IS NULL AND codigo3 IS  NULL AND codigo4 IS  NULL AND codigo5 IS  NULL
+		AND TIPO = @tipoU AND nombre_table= @nomPrincipalCU1
+	
+		
+		SELECT @contU1=COUNT(*) FROM #migracionCodigoU1
+
+		DECLARE @tipoCU1 varchar(5)='',
+		@nombreTableCU1 varchar(200)='',
+		@observacionCU1 varchar(200)='',
+		@codigoCU1 varchar(200)='',						
+		@CreateTABLECU1 NVARCHAR(max) = N'',
+		@nombreCol1CodU1 varchar(max) = '',						
+		@idCodMigracionU1 varchar(10) = ''
+
+		
+
+		WHILE @contU1 >=@secU1
+			BEGIN	
+				
+				SELECT 
+				@nombreTableCU1=nombre_tabla, 
+				@tipoCU1=tipo,
+				@codigoCU1=codigo,
+				@observacionCU1=observacion,
+				@idCodMigracionU1=codigoMigracion
+				FROM #migracionCodigoU1 
+				WHERE id = @secU1 AND nombre_tabla = @nomPrincipalCU1
+				
+
+				IF @@ROWCOUNT = 0
+				BREAK;
+
+				
+
+				DECLARE @textU1 varchar(max)
+				SET @textU1 =(
+				SELECT
+				STUFF(
+				(
+					SELECT ',' + CAST(COLUMN_NAME AS VARCHAR(50))
+					FROM #columnasU1
+					WHERE COLUMN_NAME!='pk_Id'
+					FOR XML PATH('')
+				),
+				1,
+				1,
+				''
+				))
+
+
+				SELECT *
+				INTO #NomColumnaU1
+				FROM STRING_SPLIT(@observacionCU1, ',',1)
+
+				SET @nombreCol1CodU1 = (select value from #NomColumnaU1 where ordinal=1)
+
+				SET @textU1 = REPLACE(@textU1,@nombreCol1CodU1 +',','')
+
+				INSERT INTO #camposWhere(NombreCampo1,codigo1)
+							VALUES(@nombreCol1CodU1,@codigoCU1)
+				
+
+
+				IF OBJECT_ID('tempdb..##RESULTADOU1') IS NOT NULL
+				BEGIN		
+
+					SET @CreateTABLECU1 =N'SELECT ' + @textU1 + 
+					' FROM ' + @nombreTableCU1 + 
+					' WHERE '+ @nombreCol1CodU1 +'= ''' + @codigoCU1 + ''''
+
+					INSERT INTO ##RESULTADOU1
+					EXECUTE sp_executeSQL @CreateTABLECU1
+				END	
+
+				IF OBJECT_ID('tempdb..##RESULTADOU1') IS NULL
+				BEGIN		
+
+					SET @CreateTABLECU1 =N'SELECT ' + @textU1 + 
+					' INTO ##RESULTADOU1 ' +  
+					' FROM ' + @nombreTableCU1 + 
+					' WHERE '+ @nombreCol1CodU1 +'= ''' + @codigoCU1 + ''''		
+
+					EXECUTE sp_executeSQL @CreateTABLECU1								
+					
+					
+				END
+						
+				
+				DROP TABLE #NomColumnaU1
+				SET @secU1 = @secU1 +1
+		END
+
+				DECLARE @SqlU NVARCHAR(MAX);	
+				SET @SqlU = 'SELECT '''+ @nomPrincipalCU1 + ''' AS tabla, ' 
+				+ '(SELECT codigo1 AS ' + @nombreCol1CodU1 + ' FROM #camposWhere FOR JSON PATH) AS filtros,'
+				+	'((SELECT * FROM ##RESULTADOU1 FOR JSON PATH)) AS datos FOR JSON PATH';
+
+				EXEC sp_executesql @SqlU;
+	
+				DROP TABLE ##RESULTADOU1
+
+			TRUNCATE TABLE #camposWhere
+			TRUNCATE TABLE #migracionCodigoU1
+		END		
+		DROP TABLE #columnasU1
+		
+		SET @secCU1 += 1
+		END
+		
+		
+	END
+	
+	
+	--IF @codigoTipo = '2'
+	--BEGIN
+	--	SELECT  codigo,nombre_table,codigo2,codigo3,codigo4,codigo5,codigo6,observacion,[status] 
+	--	FROM temp_registroMigracion 
+	--	WHERE tipo = 'U' and [status] = 1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS  NULL AND codigo4 IS  NULL AND codigo5 IS  NULL
+	--END
+	
+	--IF @codigoTipo = '3'
+	--BEGIN
+	--	SELECT  codigo,nombre_table,codigo2,codigo3,codigo4,codigo5,codigo6,observacion,[status] 
+	--	FROM temp_registroMigracion 
+	--	WHERE tipo = 'U' and [status] = 1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS NOT NULL AND codigo4 IS  NULL AND codigo5 IS  NULL
+	--END
+	
+	--IF @codigoTipo = '4'
+	--BEGIN
+	--	SELECT  codigo,nombre_table,codigo2,codigo3,codigo4,codigo5,codigo6,observacion,[status] 
+	--	FROM temp_registroMigracion 
+	--	WHERE tipo = 'U' and [status] = 1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS NOT NULL AND codigo4 IS NOT NULL AND codigo5 IS  NULL
+	--END
+	
+	--IF @codigoTipo = '5'
+	--BEGIN
+	--	SELECT  codigo,nombre_table,codigo2,codigo3,codigo4,codigo5,codigo6,observacion,[status] 
+	--	FROM temp_registroMigracion 
+	--	WHERE tipo = 'U' and [status] = 1 AND codigo IS NOT NULL AND codigo2 IS NOT NULL AND codigo3 IS NOT NULL AND codigo4 IS NOT NULL AND codigo5 IS NOT NULL
+	--END
+END
 
 END
