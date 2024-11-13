@@ -17,8 +17,9 @@ declare @codigo varchar(30)='',
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
 	
-	SELECT @codigo= nom_tipo_egte,@codigo2=emp_id_empresa FROM inserted
-	order by pk_Id asc
+	SELECT @codigo= nom_tipo_egte,@codigo2=emp_id_empresa 
+	FROM inserted
+	order by emp_id_empresa asc
 
 	SET @tipo ='I'
 
@@ -26,14 +27,16 @@ END
 
 IF  EXISTS (SELECT * FROM deleted)
 BEGIN
-	SELECT @codigo= pk_Id FROM deleted
-	order by pk_Id asc
+	SELECT @codigo= nom_tipo_egte,@codigo2=emp_id_empresa
+	FROM deleted
+	order by emp_id_empresa asc
 
 	SET @tipo ='D'
 END
 
 IF @tipo IS NOT NULL AND @codigo !=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_AGENTE' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_AGENTE',@tipo,@codigo,@codigo2,1,@observacion)
 END
@@ -57,13 +60,15 @@ AS
 			SET @observacion='nom_tipo_egte,emp_id_empresa'
 
 BEGIN
-	SELECT @codigo= nom_tipo_egte,@codigo2=emp_id_empresa FROM inserted
-	order by pk_Id asc
+	SELECT @codigo= nom_tipo_egte,@codigo2=emp_id_empresa 
+	FROM inserted
+	order by emp_id_empresa asc
 
 	SET @tipo ='U'
 
 	IF @codigo !=''
 	BEGIN
+			IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_AGENTE' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2) = 0
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_AGENTE',@tipo,@codigo,@codigo2,1,@observacion)
 	END

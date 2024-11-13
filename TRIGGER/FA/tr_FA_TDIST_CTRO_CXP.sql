@@ -35,8 +35,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_TDIST_CTRO_CXP' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_TDIST_CTRO_CXP',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
 END
@@ -65,10 +66,11 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!=''
 	BEGIN
-				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
-					VALUES('FA_TDIST_CTRO_CXP',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
+			IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_TDIST_CTRO_CXP' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3) = 0
+			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
+				VALUES('FA_TDIST_CTRO_CXP',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
 	END
 END
 

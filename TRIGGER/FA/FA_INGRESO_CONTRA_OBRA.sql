@@ -37,8 +37,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!='' AND @codigo5!=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_INGRESO_CONTRA_OBRA' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4 AND codigo5=@codigo5) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,[status],observacion)
 					VALUES('FA_INGRESO_CONTRA_OBRA',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,1,@observacion)
 END
@@ -70,8 +71,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!='' AND @codigo5!=''
 	BEGIN
+			IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_INGRESO_CONTRA_OBRA' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4 AND codigo5=@codigo5) = 0
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,[status],observacion)
 				VALUES('FA_INGRESO_CONTRA_OBRA',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,1,@observacion)
 	END

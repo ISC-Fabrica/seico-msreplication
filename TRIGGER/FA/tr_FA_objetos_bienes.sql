@@ -11,7 +11,6 @@ declare @codigo varchar(30)='',
 		@codigo2 varchar(30)='',
 		@codigo3 varchar(30)='',
 		@codigo4 varchar(30)='',
-		@codigo5 varchar(30)='',
 		@observacion varchar(max)='',
 		@tipo char(1)
 
@@ -37,8 +36,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!=''
 BEGIN
+			IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_objetos_bienes' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4) = 0
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_objetos_bienes',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
 END
@@ -71,8 +71,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!=''
 	BEGIN
+				IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_objetos_bienes' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4) = 0
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_objetos_bienes',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
 	END

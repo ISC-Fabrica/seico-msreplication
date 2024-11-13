@@ -17,8 +17,9 @@ declare @codigo varchar(30)='',
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
 	
-	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo=cli_cedula FROM inserted
-	order by cli_codigo asc
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo3=cli_cedula 
+	FROM inserted
+	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='I'
 
@@ -26,8 +27,9 @@ END
 
 IF  EXISTS (SELECT * FROM deleted)
 BEGIN
-	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo=cli_cedula FROM deleted
-	order by cli_codigo asc
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo=cli_cedula 
+	FROM deleted
+	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='D'
 END
@@ -58,12 +60,13 @@ AS
 			SET @observacion ='EMP_ID_EMPRESA,cli_codigo,cli_cedula'
 
 BEGIN
-	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo=cli_cedula FROM inserted
-	order by pk_Id asc
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo3=cli_cedula 
+	FROM inserted
+	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!=''
 	BEGIN
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_cliente',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)

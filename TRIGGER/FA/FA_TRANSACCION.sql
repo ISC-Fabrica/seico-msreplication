@@ -34,8 +34,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_TRANSACCION' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_TRANSACCION',@tipo,@codigo,@codigo2,1,@observacion)
 END
@@ -63,8 +64,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND @codigo2!=''
 	BEGIN
+				IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_TRANSACCION' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2) = 0
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_TRANSACCION',@tipo,@codigo,@codigo2,1,@observacion)
 	END
