@@ -306,7 +306,7 @@ BEGIN
 						IF @@ROWCOUNT = 0
 						BREAK;
 
-						IF @TipoDato1 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+						IF @TipoDato1 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 							SET @ValorDefault1 = '0';  -- Valor por defecto numérico
 						ELSE IF @TipoDato1 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 							SET @ValorDefault1 = '''''' ;  -- Valor por defecto texto
@@ -521,7 +521,7 @@ BEGIN
 						IF @@ROWCOUNT = 0
 						BREAK;
 
-						IF @TipoDato2 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+						IF @TipoDato2 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 							SET @ValorDefault2 = '0';  -- Valor por defecto numérico
 						ELSE IF @TipoDato2 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 							SET @ValorDefault2 = '''''' ;  -- Valor por defecto texto
@@ -755,7 +755,7 @@ BEGIN
 						IF @@ROWCOUNT = 0
 						BREAK;
 
-						IF @TipoDato3 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+						IF @TipoDato3 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 							SET @ValorDefault3 = '0';  -- Valor por defecto numérico
 						ELSE IF @TipoDato3 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 							SET @ValorDefault3 = '''''' ;  -- Valor por defecto texto
@@ -996,7 +996,7 @@ BEGIN
 						IF @@ROWCOUNT = 0
 						BREAK;
 
-						IF @TipoDato4 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+						IF @TipoDato4 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 							SET @ValorDefault4 = '0';  -- Valor por defecto numérico
 						ELSE IF @TipoDato4 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 							SET @ValorDefault4 = '''''' ;  -- Valor por defecto texto
@@ -1245,7 +1245,7 @@ BEGIN
 						IF @@ROWCOUNT = 0
 						BREAK;
 
-						IF @TipoDato IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+						IF @TipoDato IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 							SET @ValorDefault = '0';  -- Valor por defecto numérico
 						ELSE IF @TipoDato IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 							SET @ValorDefault = '''''' ;  -- Valor por defecto texto
@@ -1478,7 +1478,7 @@ BEGIN
 						IF @@ROWCOUNT = 0
 						BREAK;
 
-						IF @TipoDatoU1 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+						IF @TipoDatoU1 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 							SET @ValorDefaultU1 = '0';  -- Valor por defecto numérico
 						ELSE IF @TipoDatoU1 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 							SET @ValorDefaultU1 = '''''' ;  -- Valor por defecto texto
@@ -1723,7 +1723,7 @@ BEGIN
 							IF @@ROWCOUNT = 0
 							BREAK;
 
-							IF @TipoDatoU2 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							IF @TipoDatoU2 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 								SET @ValorDefaultU2 = '0';  -- Valor por defecto numérico
 							ELSE IF @TipoDatoU2 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 								SET @ValorDefaultU2 = '''''' ;  -- Valor por defecto texto
@@ -1971,7 +1971,7 @@ BEGIN
 							IF @@ROWCOUNT = 0
 							BREAK;
 
-							IF @TipoDatoU3 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							IF @TipoDatoU3 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 								SET @ValorDefaultU3 = '0';  -- Valor por defecto numérico
 							ELSE IF @TipoDatoU3 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 								SET @ValorDefaultU3 = '''''' ;  -- Valor por defecto texto
@@ -2225,7 +2225,7 @@ BEGIN
 							IF @@ROWCOUNT = 0
 							BREAK;
 
-							IF @TipoDatoU4 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							IF @TipoDatoU4 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 								SET @ValorDefaultU4 = '0';  -- Valor por defecto numérico
 							ELSE IF @TipoDatoU4 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 								SET @ValorDefaultU4 = '''''' ;  -- Valor por defecto texto
@@ -2487,7 +2487,7 @@ BEGIN
 							IF @@ROWCOUNT = 0
 							BREAK;
 
-							IF @TipoDatoU5 IN ('int', 'decimal', 'numeric', 'float', 'real','money')  -- Tipos numéricos
+							IF @TipoDatoU5 IN ('int', 'decimal', 'numeric', 'float', 'real','money','tinyint')  -- Tipos numéricos
 								SET @ValorDefaultU5 = '0';  -- Valor por defecto numérico
 							ELSE IF @TipoDatoU5 IN ('varchar', 'char', 'text', 'nvarchar', 'nchar')  -- Tipos de texto
 								SET @ValorDefaultU5 = '''''' ;  -- Valor por defecto texto
