@@ -1,9 +1,9 @@
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_LOCAL_COLOCADOS')
-	DROP TRIGGER tr_FA_LOCAL_COLOCADOS
+	DROP TRIGGER TR_FA_LOCAL_COLOCADOS
 GO
 
-CREATE TRIGGER tr_FA_LOCAL_COLOCADOS  
+CREATE TRIGGER TR_FA_LOCAL_COLOCADOS  
 ON FA_LOCAL_COLOCADOS 
 AFTER INSERT,DELETE   
 AS 
@@ -35,7 +35,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_LOCAL_COLOCADOS'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3)
 BEGIN
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 				VALUES('FA_LOCAL_COLOCADOS',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
@@ -67,7 +69,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_LOCAL_COLOCADOS'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3)
 	BEGIN
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_LOCAL_COLOCADOS',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)

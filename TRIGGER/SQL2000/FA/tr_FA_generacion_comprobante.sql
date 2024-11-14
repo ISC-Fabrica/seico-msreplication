@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_generacion_comprobante')
-	DROP TRIGGER tr_FA_generacion_comprobante
+	DROP TRIGGER TR_FA_generacion_comprobante
 GO
 
-CREATE TRIGGER tr_FA_generacion_comprobante  
+CREATE TRIGGER TR_FA_generacion_comprobante  
 ON FA_generacion_comprobante 
 AFTER INSERT,DELETE   
 AS 
@@ -35,7 +35,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_generacion_comprobante'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_generacion_comprobante',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
@@ -66,7 +68,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !='' AND @codigo2!='' AND @codigo3!=''
+	IF @codigo !='' AND @codigo2!='' AND @codigo3!='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_generacion_comprobante'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3)
 	BEGIN
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_generacion_comprobante',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)

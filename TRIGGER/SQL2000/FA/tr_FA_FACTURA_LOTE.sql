@@ -1,9 +1,9 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_FACTURA_LOTE')
-	DROP TRIGGER tr_FA_FACTURA_LOTE
+	DROP TRIGGER TR_FA_FACTURA_LOTE
 GO
 
 
-CREATE TRIGGER tr_FA_FACTURA_LOTE  
+CREATE TRIGGER TR_FA_FACTURA_LOTE  
 ON FA_FACTURA_LOTE 
 AFTER INSERT,DELETE   
 AS 
@@ -13,7 +13,7 @@ declare @codigo varchar(30),
 		@codigo3 varchar(30),
 		@codigo4 varchar(30),
 		@codigo5 varchar(30),
-		@codigo6 varchar(30)='',
+		@codigo6 varchar(30),
 		@observacion varchar(500),
 		@tipo char(1)
 
@@ -59,7 +59,7 @@ AS
 				@codigo3 varchar(30),
 				@codigo4 varchar(30),
 				@codigo5 varchar(30),
-				@codigo6 varchar(30)='',
+				@codigo6 varchar(30),
 				@observacion varchar(500),
 				@tipo char(1)
 

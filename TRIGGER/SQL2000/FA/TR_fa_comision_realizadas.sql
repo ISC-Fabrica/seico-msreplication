@@ -1,7 +1,7 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_fa_comision_realizadas')
-	DROP TRIGGER tr_fa_comision_realizadas
+	DROP TRIGGER TR_FA_comision_realizadas
 GO
-CREATE TRIGGER tr_fa_comision_realizadas  
+CREATE TRIGGER TR_FA_comision_realizadas  
 ON fa_comision_realizadas 
 AFTER INSERT,DELETE   
 AS 
@@ -42,7 +42,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'fa_comision_realizadas'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('fa_comision_realizadas',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
@@ -50,10 +52,10 @@ END
 GO
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'TR_fa_comision_realizadas_UP')
-	DROP TRIGGER TR_fa_comision_realizadas_UP
+	DROP TRIGGER TR_FA_comision_realizadas_UP
 GO
 
-CREATE TRIGGER TR_fa_comision_realizadas_UP
+CREATE TRIGGER TR_FA_comision_realizadas_UP
 ON fa_comision_realizadas
 AFTER UPDATE
 AS
@@ -80,7 +82,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'fa_comision_realizadas'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 	BEGIN
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('fa_comision_realizadas',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)

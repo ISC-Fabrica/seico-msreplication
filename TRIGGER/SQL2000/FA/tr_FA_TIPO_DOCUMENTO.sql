@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_TIPO_DOCUMENTO')
-	DROP TRIGGER tr_FA_TIPO_DOCUMENTO
+	DROP TRIGGER TR_FA_TIPO_DOCUMENTO
 GO
 
-CREATE TRIGGER tr_FA_TIPO_DOCUMENTO  
+CREATE TRIGGER TR_FA_TIPO_DOCUMENTO  
 ON FA_TIPO_DOCUMENTO 
 AFTER INSERT,DELETE   
 AS 
@@ -34,7 +34,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_TIPO_DOCUMENTO'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_TIPO_DOCUMENTO',@tipo,@codigo,@codigo2,1,@observacion)
@@ -63,7 +65,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_TIPO_DOCUMENTO'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2)
 	BEGIN
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_TIPO_DOCUMENTO',@tipo,@codigo,@codigo2,1,@observacion)

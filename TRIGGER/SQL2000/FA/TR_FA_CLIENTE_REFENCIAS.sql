@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_CLIENTE_REFENCIAS')
-	DROP TRIGGER tr_FA_CLIENTE_REFENCIAS
+	DROP TRIGGER TR_FA_CLIENTE_REFENCIAS
 GO
 
-CREATE TRIGGER tr_FA_CLIENTE_REFENCIAS  
+CREATE TRIGGER TR_FA_CLIENTE_REFENCIAS  
 ON FA_CLIENTE_REFENCIAS 
 AFTER INSERT,DELETE   
 AS 
@@ -35,7 +35,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_CLIENTE_REFENCIAS'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_CLIENTE_REFENCIAS',@tipo,@codigo,@codigo2,1,@observacion)
@@ -66,7 +68,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_CLIENTE_REFENCIAS'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2)
 	BEGIN
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_CLIENTE_REFENCIAS',@tipo,@codigo,@codigo2,1,@observacion)

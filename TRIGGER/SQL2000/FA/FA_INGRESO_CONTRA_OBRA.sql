@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_INGRESO_CONTRA_OBRA')
-	DROP TRIGGER tr_FA_INGRESO_CONTRA_OBRA
+	DROP TRIGGER TR_FA_INGRESO_CONTRA_OBRA
 GO
 
-CREATE TRIGGER tr_FA_INGRESO_CONTRA_OBRA  
+CREATE TRIGGER TR_FA_INGRESO_CONTRA_OBRA  
 ON FA_INGRESO_CONTRA_OBRA 
 AFTER INSERT,DELETE   
 AS 
@@ -37,7 +37,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_INGRESO_CONTRA_OBRA'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4 AND codigo5 = @codigo5)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,[status],observacion)
 					VALUES('FA_INGRESO_CONTRA_OBRA',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,1,@observacion)
@@ -70,7 +72,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_INGRESO_CONTRA_OBRA'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4 AND codigo5 = @codigo5)
 	BEGIN
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,[status],observacion)
 				VALUES('FA_INGRESO_CONTRA_OBRA',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,1,@observacion)
