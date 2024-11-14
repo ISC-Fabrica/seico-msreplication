@@ -12,7 +12,7 @@ declare @codigo varchar(30)='',
 		@observacion varchar(max)='',
 		@tipo char(1)
 
-		set @observacion ='CODIGO, EMP_ID_EMPRESA, par_codigo'
+		set @observacion ='CODIGO,EMP_ID_EMPRESA,par_codigo'
 
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
@@ -34,9 +34,10 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3 !=''
 BEGIN
-	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
+			IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_CTAS_CONT_PARMETRO' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3) = 0
+				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_CTAS_CONT_PARMETRO',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
 END
 GO
@@ -56,7 +57,7 @@ AS
 		@observacion varchar(max)='',
 		@tipo char(1)
 
-		set @observacion ='CODIGO, EMP_ID_EMPRESA, par_codigo'
+		set @observacion ='CODIGO,EMP_ID_EMPRESA,par_codigo'
 
 BEGIN
 	SELECT @codigo= CODIGO,@codigo2=EMP_ID_EMPRESA,@codigo3=par_codigo
@@ -65,8 +66,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3 !=''
 	BEGIN
+		IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_CTAS_CONT_PARMETRO' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3) = 0
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('FA_CTAS_CONT_PARMETRO',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
 	END

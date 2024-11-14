@@ -11,7 +11,7 @@ declare @codigo varchar(30)='',
 		@observacion varchar(max),
 		@tipo char(1)
 
-		SET @observacion='EMP_ID_EMPRESA, loc_codigo'
+		SET @observacion='EMP_ID_EMPRESA,loc_codigo'
 
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
@@ -33,8 +33,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_DETBIENES' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_DETBIENES',@tipo,@codigo,@codigo2,1,@observacion)
 END
@@ -53,7 +54,7 @@ AS
 		@observacion varchar(max),
 		@tipo char(1)
 
-		SET @observacion='EMP_ID_EMPRESA, loc_codigo'
+		SET @observacion='EMP_ID_EMPRESA,loc_codigo'
 
 BEGIN
 	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=loc_codigo 
@@ -62,8 +63,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND @codigo2 !=''
 	BEGIN
+		IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_DETBIENES' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2) = 0
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_DETBIENES',@tipo,@codigo,@codigo2,1,@observacion)
 	END

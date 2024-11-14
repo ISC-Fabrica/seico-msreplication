@@ -37,6 +37,7 @@ END
 
 IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2 !='' AND @codigo3 !='' AND @codigo4 !=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_BANCO' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_BANCO',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
 END
@@ -69,6 +70,7 @@ BEGIN
 
 	IF @codigo !='' AND @codigo2 !='' AND @codigo3 !='' AND @codigo4 !=''
 	BEGIN
+		IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_BANCO' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4) = 0
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_BANCO',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
 	END

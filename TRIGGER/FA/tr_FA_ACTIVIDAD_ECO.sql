@@ -33,6 +33,7 @@ END
 
 IF @tipo IS NOT NULL AND @codigo !=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_ACTIVIDAD_ECO' AND tipo=@tipo AND codigo=@codigo) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status],observacion)
 					VALUES('FA_ACTIVIDAD_ECO',@tipo,@codigo,1,@observacion)
 END
@@ -61,6 +62,7 @@ BEGIN
 
 	IF @codigo !=''
 	BEGIN
+		IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_ACTIVIDAD_ECO' AND tipo=@tipo AND codigo=@codigo) = 0
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status],observacion)
 					VALUES('FA_ACTIVIDAD_ECO',@tipo,@codigo,1,@observacion)
 	END

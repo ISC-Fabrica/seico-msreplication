@@ -21,7 +21,7 @@ BEGIN
 		IF @accion = 'U'
 		BEGIN
 			DECLARE @Sql NVARCHAR(MAX), @UpdateSql NVARCHAR(MAX);
-			SET @Sql = 'UPDATE ' + QUOTENAME(@nombreTable) + ' SET ';
+			SET @Sql = 'UPDATE ' + @nombreTable + ' SET ';
 
 			 SET @UpdateSql = '';
     
@@ -56,7 +56,7 @@ BEGIN
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 
-				SET @UpdateSql = @UpdateSql + QUOTENAME(@Campo) + ' = CONVERT(VARCHAR(MAX),''' + @Valor + '''), ';
+				SET @UpdateSql = @UpdateSql + @Campo + ' = CONVERT(VARCHAR(MAX),''' + @Valor + '''), ';
         
 				FETCH NEXT FROM db_cursor INTO @Campo, @Valor;
 			END;
@@ -73,7 +73,7 @@ BEGIN
 
 			SELECT @FC=Campo, @FV=Valor FROM @JsonTableFiltro
 
-			SET @UpdateSql += ' WHERE ' + QUOTENAME(@FC) + ' = CONVERT(VARCHAR(MAX),''' + @FV + ''')'
+			SET @UpdateSql += ' WHERE ' + @FC + ' = CONVERT(VARCHAR(MAX),''' + @FV + ''')'
 
 			SET @Sql = @Sql + @UpdateSql;
 						

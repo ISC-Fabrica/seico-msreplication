@@ -17,7 +17,7 @@ declare @codigo varchar(30)='',
 		@observacion varchar(max)='',
 		@tipo char(1)
 
-		set @observacion='COD_ING, emp_id_empresa,cod_bien,cod_proy,cod_obra,cod_cent'
+		set @observacion='COD_ING,emp_id_empresa,cod_bien,cod_proy,cod_obra,cod_cent'
 
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
@@ -39,8 +39,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!='' AND @codigo5!='' AND @codigo6!=''
 BEGIN
+	IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_FACTURA_LOTE' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4 AND codigo5=@codigo5 AND codigo6 = @codigo6) = 0
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,codigo6,[status],observacion)
 					VALUES('FA_FACTURA_LOTE',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,@codigo6,1,@observacion)
 END
@@ -63,7 +64,7 @@ AS
 				@observacion varchar(max)='',
 				@tipo char(1)
 
-		set @observacion='COD_ING, emp_id_empresa,cod_bien,cod_proy,cod_obra,cod_cent'
+		set @observacion='COD_ING,emp_id_empresa,cod_bien,cod_proy,cod_obra,cod_cent'
 
 BEGIN
 	SELECT @codigo= COD_ING,@codigo2=emp_id_empresa,@codigo3=cod_bien,@codigo4=cod_proy,@codigo5=cod_obra,@codigo6=cod_cent
@@ -72,8 +73,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!='' AND @codigo5!='' AND @codigo6!=''
 	BEGIN
+			IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_FACTURA_LOTE' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4 AND codigo5=@codigo5 AND codigo6 = @codigo6) = 0
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,codigo5,codigo6,[status],observacion)
 			VALUES('FA_FACTURA_LOTE',@tipo,@codigo,@codigo2,@codigo3,@codigo4,@codigo5,@codigo6,1,@observacion)
 	END

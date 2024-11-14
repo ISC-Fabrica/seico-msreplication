@@ -13,7 +13,7 @@ declare @codigo varchar(30)='',
 		@observacion varchar(max)='',
 		@tipo char(1)
 
-		SET @observacion ='EMP_ID_EMPRESA, tipo, Num_factura, cod_cliente'
+		SET @observacion ='EMP_ID_EMPRESA,tipo,Num_factura,cod_cliente'
 
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
@@ -35,9 +35,10 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!=''
 BEGIN
-	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
+			IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_CXCOBRAR_TEM' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4) = 0
+			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_CXCOBRAR_TEM',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
 END
 GO
@@ -58,17 +59,19 @@ AS
 		@observacion varchar(max)='',
 		@tipo char(1)
 
-		SET @observacion ='EMP_ID_EMPRESA, tipo, Num_factura, cod_cliente'
+		SET @observacion ='EMP_ID_EMPRESA,tipo,Num_factura,cod_cliente'
 
 BEGIN
+	
 	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=tipo,@codigo3=Num_factura,@codigo4=cod_cliente 
 	FROM inserted
 	order by EMP_ID_EMPRESA asc
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!='' AND @codigo4!=''
 	BEGIN
+		IF(SELECT COUNT(1) FROM temp_registroMigracion where nombre_table = 'FA_CXCOBRAR_TEM' AND tipo=@tipo AND codigo=@codigo AND codigo2=@codigo2 AND codigo3=@codigo3 AND codigo4=@codigo4) = 0
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_CXCOBRAR_TEM',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
 	END

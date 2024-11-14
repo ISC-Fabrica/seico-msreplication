@@ -40,10 +40,10 @@ END
 IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2!='' AND @codigo3!=''
 BEGIN
 
-	IF (SELECT COUNT(1) FROM temp_registroMigracion WHERE codigo=@codigo and codigo2=@codigo2 and codigo3=@codigo3) = 0
+	IF (SELECT COUNT(1) FROM temp_registroMigracion WHERE codigo=@codigo and codigo2=@codigo2 and codigo3=@codigo3 AND nombre_table ='FA_generacion_comprobante') = 0
 	BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
-					VALUES('FA_generacion_comprobante',99999999999999999999,@codigo,@codigo2,@codigo3,1,@observacion)
+					VALUES('FA_generacion_comprobante',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
 	END
 END
 
@@ -100,8 +100,11 @@ BEGIN TRY
 			SET @ErrorMessage=ERROR_MESSAGE()
 			SET @ErrorStatus = ERROR_STATE()
 
-			INSERT INTO LOG_TRIGGERS (observacion,nombreTrigger,codStatus)
-			VALUES (@ErrorMessage,'tr_FA_generacion_comprobante',@ErrorStatus)
+			IF (SELECT COUNT(1) FROM temp_registroMigracion WHERE codigo=@codigo and codigo2=@codigo2 and codigo3=@codigo3 AND nombre_table ='FA_generacion_comprobante') = 0
+			BEGIN
+					INSERT INTO LOG_TRIGGERS (observacion,nombreTrigger,codStatus)
+					VALUES (@ErrorMessage,'tr_FA_generacion_comprobante',@ErrorStatus)
+			END
 	END CATCH
 END	
 GO

@@ -22,7 +22,8 @@ select  @codigo ='',
 IF EXISTS (SELECT * FROM inserted)
 BEGIN
 	
-	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo3=cli_cedula FROM inserted
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo3=cli_cedula 
+	FROM inserted
 	order by cli_codigo asc
 
 	SET @tipo ='I'
@@ -31,7 +32,8 @@ END
 
 IF  EXISTS (SELECT * FROM deleted)
 BEGIN
-	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo3=cli_cedula FROM deleted
+	SELECT @codigo= EMP_ID_EMPRESA,@codigo2=cli_codigo,@codigo3=cli_cedula 
+	FROM deleted
 	order by cli_codigo asc
 
 	SET @tipo ='D'
