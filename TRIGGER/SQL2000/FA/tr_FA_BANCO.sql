@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_BANCO')
-	DROP TRIGGER tr_FA_BANCO
+	DROP TRIGGER TR_FA_BANCO
 GO
 
-CREATE TRIGGER tr_FA_BANCO 
+CREATE TRIGGER TR_FA_BANCO 
 ON FA_BANCO 
 AFTER INSERT,DELETE   
 AS 
@@ -41,7 +41,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2 !='' AND @codigo3 !='' AND @codigo4 !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND @codigo2 !='' AND @codigo3 !='' AND @codigo4 !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_BANCO'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_BANCO',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
@@ -79,7 +81,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !='' AND @codigo2 !='' AND @codigo3 !='' AND @codigo4 !=''
+	IF @codigo !='' AND @codigo2 !='' AND @codigo3 !='' AND @codigo4 !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_BANCO'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 	BEGIN
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_BANCO',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)

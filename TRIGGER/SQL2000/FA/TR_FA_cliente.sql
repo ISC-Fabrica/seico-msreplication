@@ -1,7 +1,7 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_cliente')
-	DROP TRIGGER tr_FA_cliente
+	DROP TRIGGER TR_FA_cliente
 GO
-CREATE TRIGGER tr_FA_cliente  
+CREATE TRIGGER TR_FA_cliente  
 ON FA_cliente 
 AFTER INSERT,DELETE   
 AS 

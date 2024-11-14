@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_TEMP_CXCOBRAR_EXTRA')
-	DROP TRIGGER tr_FA_TEMP_CXCOBRAR_EXTRA
+	DROP TRIGGER TR_FA_TEMP_CXCOBRAR_EXTRA
 GO
 
-CREATE TRIGGER tr_FA_TEMP_CXCOBRAR_EXTRA  
+CREATE TRIGGER TR_FA_TEMP_CXCOBRAR_EXTRA  
 ON FA_TEMP_CXCOBRAR_EXTRA 
 AFTER INSERT,DELETE   
 AS 
@@ -37,7 +37,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_TEMP_CXCOBRAR_EXTRA'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 BEGIN
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_TEMP_CXCOBRAR_EXTRA',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
@@ -71,7 +73,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_TEMP_CXCOBRAR_EXTRA'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 	BEGIN
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_TEMP_CXCOBRAR_EXTRA',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)

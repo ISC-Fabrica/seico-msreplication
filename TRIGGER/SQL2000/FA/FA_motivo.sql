@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_motivo')
-	DROP TRIGGER tr_FA_motivo
+	DROP TRIGGER TR_FA_motivo
 GO
 
-CREATE TRIGGER tr_FA_motivo  
+CREATE TRIGGER TR_FA_motivo  
 ON FA_motivo 
 AFTER INSERT,DELETE   
 AS 
@@ -35,7 +35,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_motivo'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_motivo',@tipo,@codigo,@codigo2,1,@observacion)
@@ -64,7 +66,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_motivo'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2)
 	BEGIN
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,[status],observacion)
 					VALUES('FA_motivo',@tipo,@codigo,@codigo2,1,@observacion)

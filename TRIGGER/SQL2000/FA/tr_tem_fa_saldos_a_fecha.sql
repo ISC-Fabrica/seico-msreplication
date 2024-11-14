@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_tem_fa_saldos_a_fecha')
-	DROP TRIGGER tr_tem_fa_saldos_a_fecha
+	DROP TRIGGER TR_tem_fa_saldos_a_fecha
 GO
 
-CREATE TRIGGER tr_tem_fa_saldos_a_fecha  
+CREATE TRIGGER TR_tem_fa_saldos_a_fecha  
 ON tem_fa_saldos_a_fecha 
 AFTER INSERT,DELETE   
 AS 
@@ -35,7 +35,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'tem_fa_saldos_a_fecha'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('tem_fa_saldos_a_fecha',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)
@@ -65,7 +67,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'tem_fa_saldos_a_fecha'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3)
 	BEGIN
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,[status],observacion)
 					VALUES('tem_fa_saldos_a_fecha',@tipo,@codigo,@codigo2,@codigo3,1,@observacion)

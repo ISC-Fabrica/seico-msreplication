@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_ACTIVIDAD_ECO')
-	DROP TRIGGER tr_FA_ACTIVIDAD_ECO
+	DROP TRIGGER TR_FA_ACTIVIDAD_ECO
 GO
 
-CREATE TRIGGER tr_FA_ACTIVIDAD_ECO  
+CREATE TRIGGER TR_FA_ACTIVIDAD_ECO  
 ON FA_ACTIVIDAD_ECO 
 AFTER INSERT,DELETE   
 AS 
@@ -34,7 +34,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_ACTIVIDAD_ECO'
+               AND tipo = @tipo AND codigo = @codigo)
 BEGIN
 	INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status],observacion)
 					VALUES('FA_ACTIVIDAD_ECO',@tipo,@codigo,1,@observacion)
@@ -66,7 +68,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+	   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_ACTIVIDAD_ECO'
+				   AND tipo = @tipo AND codigo = @codigo)
 	BEGIN
 		INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,[status],observacion)
 					VALUES('FA_ACTIVIDAD_ECO',@tipo,@codigo,1,@observacion)

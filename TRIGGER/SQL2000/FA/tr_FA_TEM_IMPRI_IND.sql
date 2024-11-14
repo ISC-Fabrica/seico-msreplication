@@ -1,8 +1,8 @@
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'TR' and name = 'tr_FA_TEM_IMPRI_IND')
-	DROP TRIGGER tr_FA_TEM_IMPRI_IND
+	DROP TRIGGER TR_FA_TEM_IMPRI_IND
 GO
 
-CREATE TRIGGER tr_FA_TEM_IMPRI_IND  
+CREATE TRIGGER TR_FA_TEM_IMPRI_IND  
 ON FA_TEM_IMPRI_IND 
 AFTER INSERT,DELETE   
 AS 
@@ -37,7 +37,9 @@ BEGIN
 	SET @tipo ='D'
 END
 
-IF @tipo IS NOT NULL AND @codigo !=''
+IF @tipo IS NOT NULL AND @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_TEM_IMPRI_IND'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 BEGIN
 			INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_TEM_IMPRI_IND',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
@@ -71,7 +73,9 @@ BEGIN
 
 	SET @tipo ='U'
 
-	IF @codigo !=''
+	IF @codigo !='' AND
+		   NOT EXISTS (SELECT 1 FROM temp_registroMigrado WHERE nombre_table = 'FA_TEM_IMPRI_IND'
+					   AND tipo = @tipo AND codigo = @codigo AND codigo2 = @codigo2 AND codigo3 = @codigo3 AND codigo4 = @codigo4)
 	BEGIN
 				INSERT INTO temp_registroMigracion (nombre_table,tipo,codigo,codigo2,codigo3,codigo4,[status],observacion)
 					VALUES('FA_TEM_IMPRI_IND',@tipo,@codigo,@codigo2,@codigo3,@codigo4,1,@observacion)
