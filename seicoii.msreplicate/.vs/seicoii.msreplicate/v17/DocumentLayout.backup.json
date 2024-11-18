@@ -1,12 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\git\\CNB\\seicoii.msreplicate\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|c:\\git\\cnb\\seicoii.msreplicate\\seicoii.msreplicate.library\\common\\constantes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|solutionrelative:seicoii.msreplicate.library\\common\\constantes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -14,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 15,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -75,19 +70,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:132:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Constantes.cs",
-              "DocumentMoniker": "C:\\git\\CNB\\seicoii.msreplicate\\seicoii.msreplicate.library\\Common\\Constantes.cs",
-              "RelativeDocumentMoniker": "seicoii.msreplicate.library\\Common\\Constantes.cs",
-              "ToolTip": "C:\\git\\CNB\\seicoii.msreplicate\\seicoii.msreplicate.library\\Common\\Constantes.cs",
-              "RelativeToolTip": "seicoii.msreplicate.library\\Common\\Constantes.cs",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAQwFMAAAAnAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-15T18:19:53.523Z",
-              "EditorCaption": ""
             }
           ]
         }
