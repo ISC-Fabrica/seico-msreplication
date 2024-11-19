@@ -51,15 +51,15 @@ namespace seicoii.msreplicate.library.Common
 
 
         public static string Update_EstadoTablasPendientes =
-            "UPDATE temp_registroMigracion SET status = 0 WHERE status = 1 and id = {id}";
+            "UPDATE temp_registroMigracion SET status = 0, detalleError = null WHERE status = 1 and id = {id}";
 
 
         public static string Update_EstadoOmitido =
-            "UPDATE temp_registroMigracion SET status = 2 WHERE status = 1 and id = {id}";
+            "UPDATE temp_registroMigracion SET status = 2, detalleError = '{detalleError}' WHERE status = 1 and id = {id}";
 
 
         public static string Update_EstadoErroneo =
-            "UPDATE temp_registroMigracion SET status = 9 WHERE status = 1 and id = {id}";
+            "UPDATE temp_registroMigracion SET status = 9, detalleError = '{detalleError}' WHERE status = 1 and id = {id}";
 
 
         public static string InsertInto_RegistroMigrado =

@@ -210,17 +210,18 @@ namespace seicoii.msreplicate.library.Data.Service
                                         }
                                         else
                                         {
-                                            var Erroneo = _Repository_ODBC.UpdateStateErroneo(registro.id);
+                                            var tipoRegistro = registro.tipo == "I" ? "Insertar" : (registro.tipo == "U" ? "Actualizar" : "Eliminar");
+                                            var Erroneo = _Repository_ODBC.UpdateStateErroneo(registro.id, $"Error al Intentar {tipoRegistro} la tabla {tabla}");
                                         }
                                     }
                                     else
                                     {
-                                        var Omitido = _Repository_ODBC.UpdateStateOmited(registro.id);
+                                        var Omitido = _Repository_ODBC.UpdateStateOmited(registro.id, "Tabla sin estructura para Migración");
                                     }
                                 }
                                 else
                                 {
-                                    var Erroneo = _Repository_ODBC.UpdateStateErroneo(registro.id);
+                                    var Omitido = _Repository_ODBC.UpdateStateOmited(registro.id, "Tabla sin estructura para Migración");
                                 }
                             }
                         }
@@ -435,17 +436,18 @@ namespace seicoii.msreplicate.library.Data.Service
                                         }
                                         else
                                         {
-                                            var Erroneo = _Repository_SQLC.UpdateStateErroneo(registro.id);
+                                            var tipoRegistro = registro.tipo == "I" ? "Insertar" : (registro.tipo == "U" ? "Actualizar" : "Eliminar");
+                                            var Erroneo = _Repository_SQLC.UpdateStateErroneo(registro.id, $"Error al Intentar {tipoRegistro} la tabla {tabla}");
                                         }
                                     }
                                     else
                                     {
-                                        var Omitido = _Repository_SQLC.UpdateStateOmited(registro.id);
+                                        var Omitido = _Repository_SQLC.UpdateStateOmited(registro.id, "Tabla sin estructura para Migración");
                                     }
                                 }
                                 else
                                 {
-                                    var Erroneo = _Repository_SQLC.UpdateStateErroneo(registro.id);
+                                    var Omitido = _Repository_SQLC.UpdateStateOmited(registro.id, "Tabla sin estructura para Migración");
                                 }
                             }
                         }

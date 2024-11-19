@@ -233,11 +233,19 @@ namespace seicoii.msreplicate.library.Data.Repository
             }
         }
 
-        public bool UpdateStateOmited(int id)
+        public bool UpdateStateOmited(int id, string message = "")
         {
 
+            if (string.IsNullOrEmpty(message))
+            {
+                message = "";
+            }
+            else if (message.Length > 500) {
+                message = message.Substring(0, 500);
+            }
+
             bool response = false;
-            string sentenciaSQL = Constantes.Update_EstadoOmitido.Replace("{id}", id.ToString());
+            string sentenciaSQL = Constantes.Update_EstadoOmitido.Replace("{id}", id.ToString()).Replace("{detalleError}", message);
             using (SqlConnection connection = new(connectionString))
             {
                 try
@@ -265,11 +273,20 @@ namespace seicoii.msreplicate.library.Data.Repository
             }
         }
 
-        public bool UpdateStateErroneo(int id)
+        public bool UpdateStateErroneo(int id, string error = "")
         {
 
+            if (string.IsNullOrEmpty(error))
+            {
+                error = "";
+            }
+            else if (error.Length > 500)
+            {
+                error = error.Substring(0, 500);
+            }
+
             bool response = false;
-            string sentenciaSQL = Constantes.Update_EstadoErroneo.Replace("{id}", id.ToString());
+            string sentenciaSQL = Constantes.Update_EstadoErroneo.Replace("{id}", id.ToString()).Replace("{detalleError}", error);
             using (SqlConnection connection = new(connectionString))
             {
                 try

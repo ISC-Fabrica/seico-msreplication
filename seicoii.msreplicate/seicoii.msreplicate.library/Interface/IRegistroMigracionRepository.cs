@@ -16,8 +16,8 @@ namespace seicoii.msreplicate.library.Interface
         List<ColumnValues> GetColumnValues(string Table, List<ColumnTable> columns, string Condition);
         List<temp_registroMigracion> GetPendings(string table);
         bool UpdateStateMigrated(int id);
-        bool UpdateStateOmited(int id);
-        bool UpdateStateErroneo(int id);
+        bool UpdateStateOmited(int id, string message = "");
+        bool UpdateStateErroneo(int id, string error = "");
 
         #endregion End For Select
 
