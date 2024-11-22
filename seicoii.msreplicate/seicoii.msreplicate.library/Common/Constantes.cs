@@ -29,7 +29,7 @@ namespace seicoii.msreplicate.library.Common
         public static string Select_ColumnasTabla =
            "SELECT a.name, c.name type, a.isnullable FROM syscolumns a JOIN sysobjects b ON b.id = a.id \r\n" +
             "JOIN systypes c ON a.xtype = c.xtype AND c.name <> 'sysname' \r\n" +
-            "WHERE b.type = 'U' AND b.name = '{nombre_table}' \r\n" +
+            "WHERE b.type = 'U' AND a.name not in ('pk_Id', 'factura_id') AND b.name = '{nombre_table}' \r\n" +
             "ORDER BY colid";
 
 
@@ -77,12 +77,16 @@ namespace seicoii.msreplicate.library.Common
 
         public static string InsertInto_Tables =
             "SET DATEFORMAT YMD;\r\n" +
-            "INSERT INTO {nombre_tabla} ({columnas}) VALUES ({valores})";
+            "INSERT INTO {nombre_tabla} ({columnas}) VALUES ({valores});" +
+            "\r\n" +
+            "SELECT @@ROWCOUNT [Rows];";
 
 
         public static string Update_Tables =
             "SET DATEFORMAT YMD;\r\n" +
-            "UPDATE {nombre_tabla} SET {valores} {condiciones}";
+            "UPDATE {nombre_tabla} SET {valores} {condiciones};" +
+            "\r\n" +
+            "SELECT @@ROWCOUNT [Rows];";
 
 
         public static string Select_ExistRecordTable =

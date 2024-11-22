@@ -470,15 +470,23 @@ namespace seicoii.msreplicate.library.Data.Repository
                 try
                 {
                     Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.InsertData()");
-                    OdbcCommand command = new(sentenciaSQL, connection);
+                    OdbcDataAdapter adapter = new OdbcDataAdapter(sentenciaSQL, connection);
+                    Logger.Log(adapter.SelectCommand!.CommandText);
+                    Logger.Log($"");
                     connection.Open();
-                    var resp = command.ExecuteNonQuery();
-                    response = resp > 0;
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet);
+                    if (dataSet.Tables.Count > 0)
+                    {
+                        var resp = dataSet.Tables[0].Rows[0];
+                        response = Convert.ToInt32(resp[0].ToString()) > 0;
+                    }
                 }
                 catch (OdbcException ex)
                 {
                     Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.InsertData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log($"");
                     Logger.Log(ex.ToString());
                 }
                 catch (Exception ex)
@@ -486,6 +494,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                     Logger.Log("Exception in: ODBCRegistroMigracionRepository.InsertData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log($"");
                 }
                 return response;
             }
