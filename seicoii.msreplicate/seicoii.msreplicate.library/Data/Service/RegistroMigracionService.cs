@@ -117,6 +117,9 @@ namespace seicoii.msreplicate.library.Data.Service
 
                                         Condicion = Utils.Concatenate_WHERE(Condicion, newValue);
                                     }
+                                    
+                                    var ExisteRegistro = false;
+                                    
                                     var Values = _Repository_ODBC.GetColumnValues(tabla, Columnas, Condicion);
 
                                     if (Values.Count > 0)
@@ -137,11 +140,13 @@ namespace seicoii.msreplicate.library.Data.Service
                                             fechaRegistro = registro.fechaRegistro
                                         });
                                         var ExecuteTran = false;
+                                        var tipoRegistro = registro.tipo == "I" ? "Insertar" : (registro.tipo == "U" ? "Actualizar" : "Eliminar");
+                                        var Mensaje = $"Error al Intentar \"{tipoRegistro}\" registros en la tabla \"{tabla}\"";
                                         switch (registro.tipo)
                                         {
                                             case "I": //Insertar
                                                 {
-                                                    var ExisteRegistro = _Repository_SQLC.ValidateDataBeforeInsert(tabla, Condicion);
+                                                    ExisteRegistro = _Repository_SQLC.ValidateDataBeforeInsert(tabla, Condicion);
                                                     if (!ExisteRegistro)
                                                     {
                                                         var IntoColumns = string.Empty;
@@ -163,8 +168,17 @@ namespace seicoii.msreplicate.library.Data.Service
                                                             IntoColumns = Utils.ConcatenateString(IntoColumns, val.ColumnName);
                                                             IntoValues = Utils.ConcatenateString(IntoValues, valColumn);
                                                         }
-
-                                                        ExecuteTran = _Repository_SQLC.InsertData(tabla, IntoColumns, IntoValues);
+                                                        //Desactivo los Triggers
+                                                        _Repository_SQLC.DisableTriggers(tabla);
+                                                        //Desactivo los Constraints
+                                                        _Repository_SQLC.NoCheckConstraint(tabla);
+                                                        
+                                                        (ExecuteTran, Mensaje) = _Repository_SQLC.InsertData(tabla, IntoColumns, IntoValues);
+                                                        
+                                                        //Activo los Constraints
+                                                        _Repository_SQLC.CheckConstraint(tabla);
+                                                        //Activo los Triggers
+                                                        _Repository_SQLC.EnableTriggers(tabla);
                                                     }
                                                     break;
                                                 }
@@ -196,7 +210,33 @@ namespace seicoii.msreplicate.library.Data.Service
                                                         }
                                                     }
 
-                                                    ExecuteTran = _Repository_SQLC.UpdateData(tabla, SetColumns, Condicion);
+                                                    //Desactivo los Triggers
+                                                    _Repository_SQLC.DisableTriggers(tabla);
+                                                    //Desactivo los Constraints
+                                                    _Repository_SQLC.NoCheckConstraint(tabla);
+
+                                                    (ExecuteTran, Mensaje) = _Repository_SQLC.UpdateData(tabla, SetColumns, Condicion);
+
+                                                    //Activo los Constraints
+                                                    _Repository_SQLC.CheckConstraint(tabla);
+                                                    //Activo los Triggers
+                                                    _Repository_SQLC.EnableTriggers(tabla);
+
+                                                    break;
+                                                }
+                                            case "D": //Eliminar
+                                                {
+                                                    //Desactivo los Triggers
+                                                    _Repository_SQLC.DisableTriggers(tabla);
+                                                    //Desactivo los Constraints
+                                                    _Repository_SQLC.NoCheckConstraint(tabla);
+
+                                                    (ExecuteTran, Mensaje) = _Repository_SQLC.DeleteData(tabla, Condicion);
+
+                                                    //Activo los Constraints
+                                                    _Repository_SQLC.CheckConstraint(tabla);
+                                                    //Activo los Triggers
+                                                    _Repository_SQLC.EnableTriggers(tabla);
                                                     break;
                                                 }
                                         }
@@ -208,10 +248,13 @@ namespace seicoii.msreplicate.library.Data.Service
                                             //Se cambia de estado a Migrado el Registro de Migración
                                             var Migrado = _Repository_ODBC.UpdateStateMigrated(registro.id);
                                         }
+                                        else if (registro.tipo == "I" && ExisteRegistro)
+                                        {
+                                            var Omitido = _Repository_ODBC.UpdateStateOmited(registro.id, "Registro ya existe, en el destino!");
+                                        }
                                         else
                                         {
-                                            var tipoRegistro = registro.tipo == "I" ? "Insertar" : (registro.tipo == "U" ? "Actualizar" : "Eliminar");
-                                            var Erroneo = _Repository_ODBC.UpdateStateErroneo(registro.id, $"Error al Intentar {tipoRegistro} la tabla {tabla}");
+                                            var Erroneo = _Repository_ODBC.UpdateStateErroneo(registro.id, Mensaje);
                                         }
                                     }
                                     else
@@ -342,6 +385,9 @@ namespace seicoii.msreplicate.library.Data.Service
 
                                         Condicion = Utils.Concatenate_WHERE(Condicion, newValue);
                                     }
+
+                                    var ExisteRegistro = false;
+
                                     var Values = _Repository_SQLC.GetColumnValues(tabla, Columnas, Condicion);
 
                                     if (Values.Count > 0)
@@ -363,11 +409,14 @@ namespace seicoii.msreplicate.library.Data.Service
                                         });
 
                                         var ExecuteTran = false;
+                                        var tipoRegistro = registro.tipo == "I" ? "Insertar" : (registro.tipo == "U" ? "Actualizar" : "Eliminar");
+                                        var Mensaje = $"Error al Intentar \"{tipoRegistro}\" registros en la tabla \"{tabla}\"";
+
                                         switch (registro.tipo)
                                         {
                                             case "I": //Insertar
                                                 {
-                                                    var ExisteRegistro = _Repository_ODBC.ValidateDataBeforeInsert(tabla, Condicion);
+                                                    ExisteRegistro = _Repository_ODBC.ValidateDataBeforeInsert(tabla, Condicion);
                                                     if (!ExisteRegistro)
                                                     {
                                                         var IntoColumns = string.Empty;
@@ -390,7 +439,17 @@ namespace seicoii.msreplicate.library.Data.Service
                                                             IntoValues = Utils.ConcatenateString(IntoValues, valColumn);
                                                         }
 
-                                                        ExecuteTran = _Repository_ODBC.InsertData(tabla, IntoColumns, IntoValues);
+                                                        //Desactivo los Triggers
+                                                        _Repository_ODBC.DisableTriggers(tabla);
+                                                        //Desactivo los Constraints
+                                                        _Repository_ODBC.NoCheckConstraint(tabla);
+
+                                                        (ExecuteTran, Mensaje) = _Repository_ODBC.InsertData(tabla, IntoColumns, IntoValues);
+
+                                                        //Activo los Triggers
+                                                        _Repository_ODBC.EnableTriggers(tabla);
+                                                        //Activo los Constraints
+                                                        _Repository_ODBC.CheckConstraint(tabla);
                                                     }
                                                     break;
                                                 }
@@ -422,7 +481,35 @@ namespace seicoii.msreplicate.library.Data.Service
                                                         }
                                                     }
 
-                                                    ExecuteTran = _Repository_ODBC.UpdateData(tabla, SetColumns, Condicion);
+                                                    //Desactivo los Triggers
+                                                    _Repository_ODBC.DisableTriggers(tabla);
+                                                    //Desactivo los Constraints
+                                                    _Repository_ODBC.NoCheckConstraint(tabla);
+
+                                                    (ExecuteTran, Mensaje) = _Repository_ODBC.UpdateData(tabla, SetColumns, Condicion);
+
+                                                    //Activo los Triggers
+                                                    _Repository_ODBC.EnableTriggers(tabla);
+                                                    //Activo los Constraints
+                                                    _Repository_ODBC.CheckConstraint(tabla);
+
+                                                    break;
+                                                }
+                                            case "D": //Eliminar
+                                                {
+
+                                                    //Desactivo los Triggers
+                                                    _Repository_ODBC.DisableTriggers(tabla);
+                                                    //Desactivo los Constraints
+                                                    _Repository_ODBC.NoCheckConstraint(tabla);
+
+                                                    (ExecuteTran, Mensaje) = _Repository_ODBC.DeleteData(tabla, Condicion);
+
+                                                    //Activo los Triggers
+                                                    _Repository_ODBC.EnableTriggers(tabla);
+                                                    //Activo los Constraints
+                                                    _Repository_ODBC.CheckConstraint(tabla);
+
                                                     break;
                                                 }
                                         }
@@ -434,10 +521,13 @@ namespace seicoii.msreplicate.library.Data.Service
                                             //Se cambia de estado a Migrado el Registro de Migración
                                             var Migrado = _Repository_SQLC.UpdateStateMigrated(registro.id);
                                         }
+                                        else if (registro.tipo == "I" && ExisteRegistro)
+                                        {
+                                            var Omitido = _Repository_ODBC.UpdateStateOmited(registro.id, "Registro ya existe, en el destino!");
+                                        }
                                         else
                                         {
-                                            var tipoRegistro = registro.tipo == "I" ? "Insertar" : (registro.tipo == "U" ? "Actualizar" : "Eliminar");
-                                            var Erroneo = _Repository_SQLC.UpdateStateErroneo(registro.id, $"Error al Intentar {tipoRegistro} la tabla {tabla}");
+                                            var Erroneo = _Repository_SQLC.UpdateStateErroneo(registro.id, Mensaje);
                                         }
                                     }
                                     else

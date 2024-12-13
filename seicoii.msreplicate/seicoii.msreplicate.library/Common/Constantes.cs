@@ -26,6 +26,26 @@ namespace seicoii.msreplicate.library.Common
             new() { ColumnType = "bit", ColumnValue = "{value}" }
         };
 
+        #region Begin For Constraint
+
+        public static string NoCheckConstraint =
+           "ALTER TABLE {nombre_table} NOCHECK CONSTRAINT ALL;";
+
+        public static string CheckConstraint =
+           "ALTER TABLE {nombre_table} CHECK CONSTRAINT ALL;";
+
+        #endregion End For Constraint
+
+        #region Begin For Triggers
+
+        public static string DisableTriggers =
+           "ALTER TABLE {nombre_table} DISABLE TRIGGER ALL;";
+
+        public static string EnableTriggers =
+           "ALTER TABLE {nombre_table} ENABLE TRIGGER ALL;";
+
+        #endregion End For Triggers
+
         public static string Select_ColumnasTabla =
            "SELECT a.name, c.name type, a.isnullable FROM syscolumns a JOIN sysobjects b ON b.id = a.id \r\n" +
             "JOIN systypes c ON a.xtype = c.xtype AND c.name <> 'sysname' \r\n" +
@@ -85,6 +105,13 @@ namespace seicoii.msreplicate.library.Common
         public static string Update_Tables =
             "SET DATEFORMAT YMD;\r\n" +
             "UPDATE {nombre_tabla} SET {valores} {condiciones};" +
+            "\r\n" +
+            "SELECT @@ROWCOUNT [Rows];";
+
+
+        public static string Delete_Tables =
+            "SET DATEFORMAT YMD;\r\n" +
+            "DELETE FROM {nombre_tabla} {condiciones};" +
             "\r\n" +
             "SELECT @@ROWCOUNT [Rows];";
 

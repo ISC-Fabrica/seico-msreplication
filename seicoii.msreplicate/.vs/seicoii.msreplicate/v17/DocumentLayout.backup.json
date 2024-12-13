@@ -1,7 +1,28 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\git\\CNB\\seicoii.msreplicate\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|c:\\git\\cnb\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\data\\repository\\sqlcregistromigracionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|solutionrelative:seicoii.msreplicate.library\\data\\repository\\sqlcregistromigracionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|c:\\git\\cnb\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\data\\repository\\odbcregistromigracionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|solutionrelative:seicoii.msreplicate.library\\data\\repository\\odbcregistromigracionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|c:\\git\\cnb\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\common\\constantes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|solutionrelative:seicoii.msreplicate.library\\common\\constantes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|c:\\git\\cnb\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\data\\service\\registromigracionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|solutionrelative:seicoii.msreplicate.library\\data\\service\\registromigracionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|c:\\git\\cnb\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\interface\\iregistromigracionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23489BD1-DD86-40A5-AEF7-E03B1BECEBC3}|seicoii.msreplicate.library\\seicoii.msreplicate.library.csproj|solutionrelative:seicoii.msreplicate.library\\interface\\iregistromigracionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,15 +30,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 15,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
             },
             {
               "$type": "Bookmark",
@@ -70,6 +87,71 @@
             {
               "$type": "Bookmark",
               "Name": "ST:132:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "IRegistroMigracionRepository.cs",
+              "DocumentMoniker": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Interface\\IRegistroMigracionRepository.cs",
+              "RelativeDocumentMoniker": "seicoii.msreplicate.library\\Interface\\IRegistroMigracionRepository.cs",
+              "ToolTip": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Interface\\IRegistroMigracionRepository.cs",
+              "RelativeToolTip": "seicoii.msreplicate.library\\Interface\\IRegistroMigracionRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T17:33:30.974Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "SQLCRegistroMigracionRepository.cs",
+              "DocumentMoniker": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Data\\Repository\\SQLCRegistroMigracionRepository.cs",
+              "RelativeDocumentMoniker": "seicoii.msreplicate.library\\Data\\Repository\\SQLCRegistroMigracionRepository.cs",
+              "ToolTip": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Data\\Repository\\SQLCRegistroMigracionRepository.cs",
+              "RelativeToolTip": "seicoii.msreplicate.library\\Data\\Repository\\SQLCRegistroMigracionRepository.cs",
+              "ViewState": "AgIAAKECAAAAAAAAAAAnwMMCAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T15:51:07.597Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ODBCRegistroMigracionRepository.cs",
+              "DocumentMoniker": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Data\\Repository\\ODBCRegistroMigracionRepository.cs",
+              "RelativeDocumentMoniker": "seicoii.msreplicate.library\\Data\\Repository\\ODBCRegistroMigracionRepository.cs",
+              "ToolTip": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Data\\Repository\\ODBCRegistroMigracionRepository.cs",
+              "RelativeToolTip": "seicoii.msreplicate.library\\Data\\Repository\\ODBCRegistroMigracionRepository.cs",
+              "ViewState": "AgIAAAACAAAAAAAAAAAowLsCAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T15:46:49.336Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Constantes.cs",
+              "DocumentMoniker": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Common\\Constantes.cs",
+              "RelativeDocumentMoniker": "seicoii.msreplicate.library\\Common\\Constantes.cs",
+              "ToolTip": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Common\\Constantes.cs",
+              "RelativeToolTip": "seicoii.msreplicate.library\\Common\\Constantes.cs",
+              "ViewState": "AgIAAFQAAAAAAAAAAAAQwCYAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T15:43:30.711Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RegistroMigracionService.cs",
+              "DocumentMoniker": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Data\\Service\\RegistroMigracionService.cs",
+              "RelativeDocumentMoniker": "seicoii.msreplicate.library\\Data\\Service\\RegistroMigracionService.cs",
+              "ToolTip": "C:\\git\\CNB\\seico-msreplication\\seicoii.msreplicate\\seicoii.msreplicate.library\\Data\\Service\\RegistroMigracionService.cs",
+              "RelativeToolTip": "seicoii.msreplicate.library\\Data\\Service\\RegistroMigracionService.cs",
+              "ViewState": "AgIAAMYAAAAAAAAAAAAAANkAAABkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T15:43:20.453Z",
+              "EditorCaption": ""
             }
           ]
         }

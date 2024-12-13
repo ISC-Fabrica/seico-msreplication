@@ -21,6 +21,127 @@ namespace seicoii.msreplicate.library.Data.Repository
 
         public ODBCRegistroMigracionRepository() { }
 
+        #region Begin For Constraint
+
+        public void NoCheckConstraint(string table)
+        {
+            string sentenciaSQL = Constantes.NoCheckConstraint.Replace("{nombre_table}", table);
+            using (OdbcConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.NoCheckConstraint()");
+                    OdbcCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (OdbcException ex)
+                {
+                    Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.NoCheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: ODBCRegistroMigracionRepository.NoCheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        public void CheckConstraint(string table)
+        {
+            string sentenciaSQL = Constantes.CheckConstraint.Replace("{nombre_table}", table);
+            using (OdbcConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.CheckConstraint()");
+                    OdbcCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (OdbcException ex)
+                {
+                    Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.CheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: ODBCRegistroMigracionRepository.CheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        #endregion End For Constraints
+
+
+        #region Begin For Triggers
+
+        public void DisableTriggers(string table)
+        {
+            string sentenciaSQL = Constantes.DisableTriggers.Replace("{nombre_table}", table);
+            using (OdbcConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.DisableTriggers()");
+                    OdbcCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (OdbcException ex)
+                {
+                    Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.DisableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: ODBCRegistroMigracionRepository.DisableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        public void EnableTriggers(string table)
+        {
+            string sentenciaSQL = Constantes.EnableTriggers.Replace("{nombre_table}", table);
+            using (OdbcConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.EnableTriggers()");
+                    OdbcCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (OdbcException ex)
+                {
+                    Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.EnableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: ODBCRegistroMigracionRepository.EnableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        #endregion End For Triggers
+
 
         #region Begin For Select ODBC
         public List<string> GetTables()
@@ -427,6 +548,10 @@ namespace seicoii.msreplicate.library.Data.Repository
             string sentenciaSQL = Constantes.Select_ExistRecordTable
                                             .Replace("{nombre_tabla}", Table)
                                             .Replace("{condiciones}", Condition);
+
+            Logger.Log("ODBCRegistroMigracionRepository.ValidateDataBeforeInsert() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+
             using (OdbcConnection connection = new(connectionString))
             {
                 try
@@ -441,95 +566,189 @@ namespace seicoii.msreplicate.library.Data.Repository
                     {
                         response = dataSet.Tables[0].Rows.Count > 0;
                     }
+                    Logger.Log($"REGISTRO EXISTENTE = {(response ? "SI" : "NO")}");
+                    Logger.Log("ODBCRegistroMigracionRepository.ValidateDataBeforeInsert() - END");
                 }
                 catch (OdbcException ex)
                 {
                     Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.ValidateDataBeforeInsert()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("ODBCRegistroMigracionRepository.ValidateDataBeforeInsert() - END");
                 }
                 catch (Exception ex)
                 {
                     Logger.Log("Exception in: ODBCRegistroMigracionRepository.ValidateDataBeforeInsert()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("ODBCRegistroMigracionRepository.ValidateDataBeforeInsert() - END");
                 }
                 return response;
             }
         }
 
-        public bool InsertData(string Table, string IntoColumns, string Values)
+        public (bool, string) InsertData(string Table, string IntoColumns, string Values)
         {
+            string Mensaje = "Registro Insertado con éxito";
             bool response = false;
             string sentenciaSQL = Constantes.InsertInto_Tables
                                         .Replace("{nombre_tabla}", Table)
                                         .Replace("{columnas}", IntoColumns)
                                         .Replace("{valores}", Values);
+
+            Logger.Log("ODBCRegistroMigracionRepository.InsertData() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+            Logger.Log($"");
+
             using (OdbcConnection connection = new(connectionString))
             {
                 try
                 {
-                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.InsertData()");
                     OdbcDataAdapter adapter = new OdbcDataAdapter(sentenciaSQL, connection);
-                    Logger.Log(adapter.SelectCommand!.CommandText);
-                    Logger.Log($"");
+                    //Logger.Log(adapter.SelectCommand!.CommandText);
                     connection.Open();
                     DataSet dataSet = new DataSet();
                     adapter.Fill(dataSet);
+                    var totalRegistros = "0";
                     if (dataSet.Tables.Count > 0)
                     {
                         var resp = dataSet.Tables[0].Rows[0];
+                        totalRegistros = resp[0].ToString();
                         response = Convert.ToInt32(resp[0].ToString()) > 0;
                     }
+                    Logger.Log($"REGISTROS INSERTADOS = {totalRegistros}");
+                    Logger.Log("ODBCRegistroMigracionRepository.InsertData() - END");
                 }
                 catch (OdbcException ex)
                 {
+                    Mensaje = $"OdbcException: {ex.Message}";
                     Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.InsertData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log($"");
                     Logger.Log(ex.ToString());
+                    Logger.Log("ODBCRegistroMigracionRepository.InsertData() - END");
                 }
                 catch (Exception ex)
                 {
+                    Mensaje = $"Exception: {ex.Message}";
                     Logger.Log("Exception in: ODBCRegistroMigracionRepository.InsertData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                     Logger.Log($"");
+                    Logger.Log("ODBCRegistroMigracionRepository.InsertData() - END");
                 }
-                return response;
+                return (response, Mensaje);
             }
         }
 
-        public bool UpdateData(string Table, string SetColumns, string Condition)
+        public (bool, string) UpdateData(string Table, string SetColumns, string Condition)
         {
+            string Mensaje = "Registro Actualizado con éxito";
             bool response = false;
             string sentenciaSQL = Constantes.Update_Tables
                                         .Replace("{nombre_tabla}", Table)
                                         .Replace("{valores}", SetColumns)
                                         .Replace("{condiciones}", Condition);
+
+            Logger.Log("ODBCRegistroMigracionRepository.UpdateData() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+            Logger.Log($"");
+
             using (OdbcConnection connection = new(connectionString))
             {
                 try
                 {
-                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.UpdateData()");
-                    OdbcCommand command = new(sentenciaSQL, connection);
+                    OdbcDataAdapter adapter = new OdbcDataAdapter(sentenciaSQL, connection);
+                    //Logger.Log(adapter.SelectCommand!.CommandText);
                     connection.Open();
-                    var resp = command.ExecuteNonQuery();
-                    response = resp > 0;
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet);
+                    var totalRegistros = "0";
+                    if (dataSet.Tables.Count > 0)
+                    {
+                        var resp = dataSet.Tables[0].Rows[0];
+                        totalRegistros = resp[0].ToString();
+                        response = Convert.ToInt32(resp[0].ToString()) > 0;
+                    }
+                    if (Convert.ToInt32(totalRegistros) == 0)
+                    {
+                        Mensaje = $"Registro no fue ACTUALIZADO, no concide con la condición: \"{Condition}\"";
+                    }
+                    Logger.Log($"REGISTROS ACTUALIZADOS = {totalRegistros}");
+                    Logger.Log("ODBCRegistroMigracionRepository.UpdateData() - END");
                 }
                 catch (OdbcException ex)
                 {
+                    Mensaje = $"OdbcException: {ex.Message}";
                     Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.UpdateData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("ODBCRegistroMigracionRepository.UpdateData() - END");
                 }
                 catch (Exception ex)
                 {
+                    Mensaje = $"Exception: {ex.Message}";
                     Logger.Log("Exception in: ODBCRegistroMigracionRepository.UpdateData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("ODBCRegistroMigracionRepository.UpdateData() - END");
                 }
-                return response;
+                return (response, Mensaje);
+            }
+        }
+
+        public (bool, string) DeleteData(string Table, string Condition)
+        {
+            string Mensaje = "Registro Eliminado con éxito";
+            bool response = false;
+            string sentenciaSQL = Constantes.Update_Tables
+                                        .Replace("{nombre_tabla}", Table)
+                                        .Replace("{condiciones}", Condition);
+
+            Logger.Log("ODBCRegistroMigracionRepository.DeleteData() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+            Logger.Log($"");
+
+            using (OdbcConnection connection = new(connectionString))
+            {
+                try
+                {
+                    OdbcDataAdapter adapter = new OdbcDataAdapter(sentenciaSQL, connection);
+                    //Logger.Log(adapter.SelectCommand!.CommandText);
+                    connection.Open();
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet);
+                    var totalRegistros = "0";
+                    if (dataSet.Tables.Count > 0)
+                    {
+                        var resp = dataSet.Tables[0].Rows[0];
+                        totalRegistros = resp[0].ToString();
+                        response = Convert.ToInt32(resp[0].ToString()) > 0;
+                    }
+                    if (Convert.ToInt32(totalRegistros) == 0)
+                    {
+                        Mensaje = $"Registro no fue ELIMINADO, no concide con la condición: \"{Condition}\"";
+                    }
+                    Logger.Log($"REGISTROS ELIMINADOS = {totalRegistros}");
+                    Logger.Log("ODBCRegistroMigracionRepository.DeleteData() - END");
+                }
+                catch (OdbcException ex)
+                {
+                    Mensaje = $"OdbcException: {ex.Message}";
+                    Logger.Log("OdbcException in: ODBCRegistroMigracionRepository.DeleteData()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                    Logger.Log("ODBCRegistroMigracionRepository.DeleteData() - END");
+                }
+                catch (Exception ex)
+                {
+                    Mensaje = $"Exception: {ex.Message}";
+                    Logger.Log("Exception in: ODBCRegistroMigracionRepository.DeleteData()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                    Logger.Log("ODBCRegistroMigracionRepository.DeleteData() - END");
+                }
+                return (response, Mensaje);
             }
         }
 

@@ -9,6 +9,20 @@ namespace seicoii.msreplicate.library.Interface
 {
     public interface IRegistroMigracionRepository
     {
+        #region Begin For Constraints
+
+        void NoCheckConstraint(string table);
+        void CheckConstraint(string table);
+
+        #endregion End For Constraints
+
+        #region Begin For Triggers
+
+        void DisableTriggers(string table);
+        void EnableTriggers(string table);
+
+        #endregion End For Triggers
+
         #region Begin For Select
 
         List<string> GetTables();
@@ -26,8 +40,9 @@ namespace seicoii.msreplicate.library.Interface
         int InsertDataMigrated(insert_temp_registroMigrado data);
         bool DeleteDataMigrated(int id);
         bool ValidateDataBeforeInsert(string Table, string Condition);
-        bool InsertData(string Table, string IntoColumns, string Values);
-        bool UpdateData(string Table, string SetColumns, string Condition);
+        (bool, string) InsertData(string Table, string IntoColumns, string Values);
+        (bool, string) UpdateData(string Table, string SetColumns, string Condition);
+        (bool, string) DeleteData(string Table, string Condition);
 
         #endregion End For Insert/Update
     }

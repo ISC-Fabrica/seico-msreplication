@@ -22,6 +22,127 @@ namespace seicoii.msreplicate.library.Data.Repository
 
         public SQLCRegistroMigracionRepository() { }
 
+        #region Begin For Constraint
+
+        public void NoCheckConstraint(string table)
+        {
+            string sentenciaSQL = Constantes.NoCheckConstraint.Replace("{nombre_table}", table);
+            using (SqlConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.NoCheckConstraint()");
+                    SqlCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (SqlException ex)
+                {
+                    Logger.Log("SqlException in: SQLCRegistroMigracionRepository.NoCheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: SQLCRegistroMigracionRepository.NoCheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        public void CheckConstraint(string table)
+        {
+            string sentenciaSQL = Constantes.CheckConstraint.Replace("{nombre_table}", table);
+            using (SqlConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.CheckConstraint()");
+                    SqlCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (SqlException ex)
+                {
+                    Logger.Log("SqlException in: SQLCRegistroMigracionRepository.CheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: SQLCRegistroMigracionRepository.CheckConstraint()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        #endregion End For Constraints
+
+
+        #region Begin For Triggers
+
+        public void DisableTriggers(string table)
+        {
+            string sentenciaSQL = Constantes.DisableTriggers.Replace("{nombre_table}", table);
+            using (SqlConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.DisableTriggers()");
+                    SqlCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (SqlException ex)
+                {
+                    Logger.Log("SqlException in: SQLCRegistroMigracionRepository.DisableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: SQLCRegistroMigracionRepository.DisableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        public void EnableTriggers(string table)
+        {
+            string sentenciaSQL = Constantes.EnableTriggers.Replace("{nombre_table}", table);
+            using (SqlConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.EnableTriggers()");
+                    SqlCommand command = new(sentenciaSQL, connection);
+                    connection.Open();
+                    var re = command.ExecuteNonQuery();
+
+                }
+                catch (SqlException ex)
+                {
+                    Logger.Log("SqlException in: SQLCRegistroMigracionRepository.EnableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Exception in: SQLCRegistroMigracionRepository.EnableTriggers()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                }
+            }
+        }
+
+        #endregion End For Triggers
+
 
         #region Begin For Select SqlClient
         public List<string> GetTables()
@@ -403,6 +524,10 @@ namespace seicoii.msreplicate.library.Data.Repository
             string sentenciaSQL = Constantes.Select_ExistRecordTable
                                             .Replace("{nombre_tabla}", Table)
                                             .Replace("{condiciones}", Condition);
+
+            Logger.Log("SQLCRegistroMigracionRepository.ValidateDataBeforeInsert() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+
             using (SqlConnection connection = new(connectionString))
             {
                 try
@@ -416,87 +541,192 @@ namespace seicoii.msreplicate.library.Data.Repository
                     {
                         response = dataSet.Tables[0].Rows.Count > 0;
                     }
+                    Logger.Log($"REGISTRO EXISTENTE = {(response ? "SI" : "NO")}");
+                    Logger.Log("SQLCRegistroMigracionRepository.ValidateDataBeforeInsert() - END");
                 }
                 catch (OdbcException ex)
                 {
                     Logger.Log("OdbcException in: SQLCRegistroMigracionRepository.ValidateDataBeforeInsert()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.ValidateDataBeforeInsert() - END");
                 }
                 catch (Exception ex)
                 {
                     Logger.Log("Exception in: SQLCRegistroMigracionRepository.ValidateDataBeforeInsert()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.ValidateDataBeforeInsert() - END");
                 }
                 return response;
             }
         }
 
-        public bool InsertData(string Table, string IntoColumns, string Values)
+        public (bool, string) InsertData(string Table, string IntoColumns, string Values)
         {
+            string Mensaje = "Registro Insertado con éxito";
             bool response = false;
             string sentenciaSQL = Constantes.InsertInto_Tables
                                         .Replace("{nombre_tabla}", Table)
                                         .Replace("{columnas}", IntoColumns)
                                         .Replace("{valores}", Values);
+
+            Logger.Log("SQLCRegistroMigracionRepository.InsertData() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+            Logger.Log($"");
+
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.InsertData()");
-                    SqlCommand command = new(sentenciaSQL, connection);
+                    SqlDataAdapter adapter = new SqlDataAdapter(sentenciaSQL, connection);
+                    //Logger.Log(adapter.SelectCommand!.CommandText);
                     connection.Open();
-                    var resp = command.ExecuteNonQuery();
-                    response = resp > 0;
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet);
+                    var totalRegistros = "0";
+                    if (dataSet.Tables.Count > 0)
+                    {
+                        var resp = dataSet.Tables[0].Rows[0];
+                        totalRegistros = resp[0].ToString();
+                        response = Convert.ToInt32(resp[0].ToString()) > 0;
+                    }
+                    Logger.Log($"REGISTROS INSERTADOS = {totalRegistros}");
+                    Logger.Log("SQLCRegistroMigracionRepository.InsertData() - END");
                 }
-                catch (OdbcException ex)
+                catch (SqlException ex)
                 {
-                    Logger.Log("OdbcException in: SQLCRegistroMigracionRepository.InsertData()");
+                    Mensaje = $"SqlException: {ex.Message}";
+                    Logger.Log("SqlException in: SQLCRegistroMigracionRepository.InsertData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.InsertData() - END");
                 }
                 catch (Exception ex)
                 {
+                    Mensaje = $"Exception: {ex.Message}";
                     Logger.Log("Exception in: SQLCRegistroMigracionRepository.InsertData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.InsertData() - END");
                 }
-                return response;
+                return (response, Mensaje);
             }
         }
 
-        public bool UpdateData(string Table, string SetColumns, string Condition)
+        public (bool, string) UpdateData(string Table, string SetColumns, string Condition)
         {
+            string Mensaje = "Registro Actualizado con éxito";
             bool response = false;
             string sentenciaSQL = Constantes.Update_Tables
                                     .Replace("{nombre_tabla}", Table)
                                     .Replace("{valores}", SetColumns)
                                     .Replace("{condiciones}", Condition);
+
+            Logger.Log("SQLCRegistroMigracionRepository.UpdateData() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+            Logger.Log($"");
+
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.UpdateData()");
-                    SqlCommand command = new(sentenciaSQL, connection);
+                    SqlDataAdapter adapter = new SqlDataAdapter(sentenciaSQL, connection);
+                    //Logger.Log(adapter.SelectCommand!.CommandText);
                     connection.Open();
-                    var resp = command.ExecuteNonQuery();
-                    response = resp > 0;
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet);
+                    var totalRegistros = "0";
+                    if (dataSet.Tables.Count > 0)
+                    {
+                        var resp = dataSet.Tables[0].Rows[0];
+                        totalRegistros = resp[0].ToString();
+                        response = Convert.ToInt32(totalRegistros) > 0;
+                    }
+                    if (Convert.ToInt32(totalRegistros) == 0)
+                    {
+                        Mensaje = $"Registro no fue ACTUALIZADO, no concide con la condición: \"{Condition}\"";
+                    }
+                    Logger.Log($"REGISTROS ACTUALIZADOS = {totalRegistros}");
+                    Logger.Log("SQLCRegistroMigracionRepository.UpdateData() - END");
                 }
-                catch (OdbcException ex)
+                catch (SqlException ex)
                 {
-                    Logger.Log("OdbcException in: SQLCRegistroMigracionRepository.UpdateData()");
+                    Mensaje = $"SqlException: {ex.Message}";
+                    Logger.Log("SqlException in: SQLCRegistroMigracionRepository.UpdateData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.UpdateData() - END");
                 }
                 catch (Exception ex)
                 {
+                    Mensaje = $"Exception: {ex.Message}";
                     Logger.Log("Exception in: SQLCRegistroMigracionRepository.UpdateData()");
                     Logger.Log($"Sentencia SQL: {sentenciaSQL}");
 
                     Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.UpdateData() - END");
                 }
-                return response;
+                return (response, Mensaje);
+            }
+        }
+
+        public (bool, string) DeleteData(string Table, string Condition)
+        {
+            string Mensaje = "Registro Eliminado con éxito";
+            bool response = false;
+            string sentenciaSQL = Constantes.Update_Tables
+                                    .Replace("{nombre_tabla}", Table)
+                                    .Replace("{condiciones}", Condition);
+
+            Logger.Log("SQLCRegistroMigracionRepository.DeleteData() - BEGIN");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+            Logger.Log($"");
+
+            using (SqlConnection connection = new(connectionString))
+            {
+                try
+                {
+                    Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.DeleteData()");
+                    SqlDataAdapter adapter = new SqlDataAdapter(sentenciaSQL, connection);
+                    //Logger.Log(adapter.SelectCommand!.CommandText);
+                    connection.Open();
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet);
+                    var totalRegistros = "0";
+                    if (dataSet.Tables.Count > 0)
+                    {
+                        var resp = dataSet.Tables[0].Rows[0];
+                        totalRegistros = resp[0].ToString();
+                        response = Convert.ToInt32(resp[0].ToString()) > 0;
+                    }
+                    if (Convert.ToInt32(totalRegistros) == 0)
+                    {
+                        Mensaje = $"Registro no fue ELIMINADO, no concide con la condición: \"{Condition}\"";
+                    }
+                    Logger.Log($"REGISTROS ELIMINADOS = {totalRegistros}");
+                    Logger.Log("SQLCRegistroMigracionRepository.DeleteData() - END");
+                }
+                catch (SqlException ex)
+                {
+                    Mensaje = $"SqlException: {ex.Message}";
+                    Logger.Log("SqlException in: SQLCRegistroMigracionRepository.DeleteData()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.DeleteData() - END");
+                }
+                catch (Exception ex)
+                {
+                    Mensaje = $"Exception: {ex.Message}";
+                    Logger.Log("Exception in: SQLCRegistroMigracionRepository.DeleteData()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+
+                    Logger.Log(ex.ToString());
+                    Logger.Log("SQLCRegistroMigracionRepository.DeleteData() - END");
+                }
+                return (response, Mensaje);
             }
         }
 
