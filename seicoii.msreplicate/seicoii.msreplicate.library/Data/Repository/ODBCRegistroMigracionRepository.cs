@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Data.Common;
 using System.Reflection.PortableExecutable;
+
 using seicoii.msreplicate.library.Common;
 
 namespace seicoii.msreplicate.library.Data.Repository
@@ -18,6 +19,7 @@ namespace seicoii.msreplicate.library.Data.Repository
     {
 
         string connectionString = ConfigurationManager.ConnectionStrings["SEICOII_APP"].ConnectionString;
+        string filtroTablas = ConfigurationManager.AppSettings["FiltroTablas"] ?? string.Empty;
 
         public ODBCRegistroMigracionRepository() { }
 
@@ -147,7 +149,8 @@ namespace seicoii.msreplicate.library.Data.Repository
         public List<string> GetTables()
         {
             List<string> response = new List<string>();
-            string sentenciaSQL = Constantes.Select_TablasPendientes;
+            string andTables = string.IsNullOrEmpty(filtroTablas) ? "" : $" AND nombre_table IN ({filtroTablas}) ";
+            string sentenciaSQL = Constantes.Select_TablasPendientes.Replace("{condicion_adicional}", andTables);
             using (OdbcConnection connection = new(connectionString))
             {
                 try
@@ -228,7 +231,6 @@ namespace seicoii.msreplicate.library.Data.Repository
         public List<ColumnValues> GetColumnValues(string Table, List<ColumnTable> columns, string Condition)
         {
             List<ColumnValues> response = new List<ColumnValues>();
-
 
             var ColumnasSQL = string.Empty;
             foreach (var column in columns)
@@ -355,6 +357,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                 try
                 {
                     Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.UpdateStateMigrated()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     OdbcCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var re = command.ExecuteNonQuery();
@@ -437,6 +440,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                 try
                 {
                     Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.UpdateStateErroneo()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     OdbcCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var re = command.ExecuteNonQuery();
@@ -468,22 +472,23 @@ namespace seicoii.msreplicate.library.Data.Repository
         {
             int response = 0;
             string sentenciaSQL = Constantes.InsertInto_RegistroMigrado
-                                        .Replace("{nombre_table}", Utils.Replace_ValueInsert("'{value}'", data.nombre_table.ToString()))
-                                        .Replace("{tipo}", Utils.Replace_ValueInsert("'{value}'", data.tipo.ToString()))
-                                        .Replace("{codigo}", Utils.Replace_ValueInsert("'{value}'", data.codigo.ToString()))
-                                        .Replace("{codigo2}", Utils.Replace_ValueInsert("'{value}'", data.codigo2.ToString()))
-                                        .Replace("{codigo3}", Utils.Replace_ValueInsert("'{value}'", data.codigo3.ToString()))
-                                        .Replace("{codigo4}", Utils.Replace_ValueInsert("'{value}'", data.codigo4.ToString()))
-                                        .Replace("{codigo5}", Utils.Replace_ValueInsert("'{value}'", data.codigo5.ToString()))
-                                        .Replace("{codigo6}", Utils.Replace_ValueInsert("'{value}'", data.codigo6.ToString()))
-                                        .Replace("{observacion}", Utils.Replace_ValueInsert("'{value}'", data.observacion.ToString()))
-                                        .Replace("{status}", Utils.Replace_ValueInsert("{value}", data.status.ToString()))
-                                        .Replace("{fechaRegistro}", Utils.Replace_ValueInsert("'{value}'", data.fechaRegistro.ToString("yyyy-MM-dd HH:mm:ss")));
+                                            .Replace("{nombre_table}", Utils.Replace_ValueInsert("'{value}'", data.nombre_table.ToString()))
+                                            .Replace("{tipo}", Utils.Replace_ValueInsert("'{value}'", data.tipo.ToString()))
+                                            .Replace("{codigo}", Utils.Replace_ValueInsert("'{value}'", data.codigo.ToString()))
+                                            .Replace("{codigo2}", Utils.Replace_ValueInsert("'{value}'", data.codigo2.ToString()))
+                                            .Replace("{codigo3}", Utils.Replace_ValueInsert("'{value}'", data.codigo3.ToString()))
+                                            .Replace("{codigo4}", Utils.Replace_ValueInsert("'{value}'", data.codigo4.ToString()))
+                                            .Replace("{codigo5}", Utils.Replace_ValueInsert("'{value}'", data.codigo5.ToString()))
+                                            .Replace("{codigo6}", Utils.Replace_ValueInsert("'{value}'", data.codigo6.ToString()))
+                                            .Replace("{observacion}", Utils.Replace_ValueInsert("'{value}'", data.observacion.ToString()))
+                                            .Replace("{status}", Utils.Replace_ValueInsert("{value}", data.status.ToString()))
+                                            .Replace("{fechaRegistro}", Utils.Replace_ValueInsert("'{value}'", data.fechaRegistro.ToString("yyyy-MM-dd HH:mm:ss")));
             using (OdbcConnection connection = new(connectionString))
             {
                 try
                 {
                     Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.InsertDataMigrated()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     OdbcCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var reader = command.ExecuteReader();
@@ -520,6 +525,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                 try
                 {
                     Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.DeleteDataMigrated()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     OdbcCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var re = command.ExecuteNonQuery();
@@ -550,7 +556,6 @@ namespace seicoii.msreplicate.library.Data.Repository
                                             .Replace("{condiciones}", Condition);
 
             Logger.Log("ODBCRegistroMigracionRepository.ValidateDataBeforeInsert() - BEGIN");
-            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
 
             using (OdbcConnection connection = new(connectionString))
             {
@@ -604,6 +609,7 @@ namespace seicoii.msreplicate.library.Data.Repository
             {
                 try
                 {
+                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.InsertData()");
                     OdbcDataAdapter adapter = new OdbcDataAdapter(sentenciaSQL, connection);
                     //Logger.Log(adapter.SelectCommand!.CommandText);
                     connection.Open();
@@ -658,6 +664,7 @@ namespace seicoii.msreplicate.library.Data.Repository
             {
                 try
                 {
+                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.UpdateData()");
                     OdbcDataAdapter adapter = new OdbcDataAdapter(sentenciaSQL, connection);
                     //Logger.Log(adapter.SelectCommand!.CommandText);
                     connection.Open();
@@ -672,7 +679,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                     }
                     if (Convert.ToInt32(totalRegistros) == 0)
                     {
-                        Mensaje = $"Registro no fue ACTUALIZADO, no concide con la condición: \"{Condition}\"";
+                        Mensaje = $"Registro no fue ACTUALIZADO, no concide con la condición: [{Condition.Replace("'", "\"")}]";
                     }
                     Logger.Log($"REGISTROS ACTUALIZADOS = {totalRegistros}");
                     Logger.Log("ODBCRegistroMigracionRepository.UpdateData() - END");
@@ -701,9 +708,9 @@ namespace seicoii.msreplicate.library.Data.Repository
         {
             string Mensaje = "Registro Eliminado con éxito";
             bool response = false;
-            string sentenciaSQL = Constantes.Update_Tables
-                                        .Replace("{nombre_tabla}", Table)
-                                        .Replace("{condiciones}", Condition);
+            string sentenciaSQL = Constantes.Delete_Tables
+                                            .Replace("{nombre_tabla}", Table)
+                                            .Replace("{condiciones}", Condition);
 
             Logger.Log("ODBCRegistroMigracionRepository.DeleteData() - BEGIN");
             Logger.Log($"Sentencia SQL: {sentenciaSQL}");
@@ -713,6 +720,7 @@ namespace seicoii.msreplicate.library.Data.Repository
             {
                 try
                 {
+                    Logger.Log("Ejecutando Metodo: ODBCRegistroMigracionRepository.DeleteData()");
                     OdbcDataAdapter adapter = new OdbcDataAdapter(sentenciaSQL, connection);
                     //Logger.Log(adapter.SelectCommand!.CommandText);
                     connection.Open();
@@ -727,7 +735,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                     }
                     if (Convert.ToInt32(totalRegistros) == 0)
                     {
-                        Mensaje = $"Registro no fue ELIMINADO, no concide con la condición: \"{Condition}\"";
+                        Mensaje = $"Registro no fue ELIMINADO, no concide con la condición: [{Condition.Replace("'","\"")}]";
                     }
                     Logger.Log($"REGISTROS ELIMINADOS = {totalRegistros}");
                     Logger.Log("ODBCRegistroMigracionRepository.DeleteData() - END");

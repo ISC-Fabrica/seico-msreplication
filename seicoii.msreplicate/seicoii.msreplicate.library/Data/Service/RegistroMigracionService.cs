@@ -37,8 +37,9 @@ namespace seicoii.msreplicate.library.Data.Service
                     var tabCurrent = 1;
                     foreach (var tabla in Tablas)
                     {
+                        var consoleTabla = $"Tabla: {tabla} - {tabCurrent} de {tabTotal}";
                         Console.WriteLine("");
-                        Console.WriteLine($"Tabla: {tabla} - {tabCurrent} de {tabTotal}");
+                        Console.Write(consoleTabla);
                         tabCurrent++;
                         //Obtener Columnas de tabla a Migrar
                         var Columnas = _Repository_ODBC.GetColumnTables(tabla);
@@ -56,7 +57,8 @@ namespace seicoii.msreplicate.library.Data.Service
                             var Current = 1;
                             foreach (var registro in Registros)
                             {
-                                Console.WriteLine($"Registro {Current} de {Total}");
+                                drawTextProgressBar(consoleTabla, Current, Total);
+                                //Console.WriteLine($"Registro {Current} de {Total}");
                                 Current++;
 
                                 Logger.Log($"Registro: {JsonConvert.SerializeObject(registro)}");
@@ -268,7 +270,9 @@ namespace seicoii.msreplicate.library.Data.Service
                                 }
                             }
                         }
+                        Console.WriteLine("");
                     }
+                    Console.WriteLine("");
                 }
             }
             catch (OdbcException ex)
@@ -305,8 +309,9 @@ namespace seicoii.msreplicate.library.Data.Service
                     var tabCurrent = 1;
                     foreach (var tabla in Tablas)
                     {
+                        var consoleTabla = $"Tabla: {tabla} - {tabCurrent} de {tabTotal}";
                         Console.WriteLine("");
-                        Console.WriteLine($"Tabla: {tabla} - {tabCurrent} de {tabTotal}");
+                        Console.Write(consoleTabla);
                         tabCurrent++;
                         //Obtener Columnas de tabla a Migrar
                         var Columnas = _Repository_SQLC.GetColumnTables(tabla);
@@ -324,7 +329,8 @@ namespace seicoii.msreplicate.library.Data.Service
                             var Current = 1;
                             foreach (var registro in Registros)
                             {
-                                Console.WriteLine($"Registro {Current} de {Total}");
+                                drawTextProgressBar(consoleTabla, Current, Total);
+                                //Console.WriteLine($"Registro {Current} de {Total}");
                                 Current++;
 
                                 Logger.Log($"Registro: {JsonConvert.SerializeObject(registro)}");
@@ -541,7 +547,9 @@ namespace seicoii.msreplicate.library.Data.Service
                                 }
                             }
                         }
+                        Console.WriteLine("");
                     }
+                    Console.WriteLine("");
                 }
             }
             catch (OdbcException ex)
@@ -564,5 +572,45 @@ namespace seicoii.msreplicate.library.Data.Service
 
         }
 
+        private static void drawTextProgressBar(string item, int progress, int total)
+        {
+            var cursorIni = item.Length < 50 ? 50 : item.Length;
+
+            //draw empty progress bar
+            Console.CursorLeft = 0 + cursorIni;
+            Console.Write("["); //start
+            Console.CursorLeft = 32 + cursorIni;
+            Console.Write("]"); //end
+            Console.CursorLeft = 1 + cursorIni;
+            float onechunk = 30.0f / total;
+
+            //draw filled part
+            int position = 1;
+            for (int i = 0; i < onechunk * progress; i++)
+            {
+                Console.BackgroundColor = ConsoleColor.Green;
+                Console.CursorLeft = position++;
+                Console.CursorLeft += cursorIni;
+                Console.Write(" ");
+            }
+
+            //draw unfilled part
+            for (int i = position; i <= 31; i++)
+            {
+                if (progress == total)
+                    Console.BackgroundColor = ConsoleColor.Green;
+                else
+                    Console.BackgroundColor = ConsoleColor.Gray;
+
+                Console.CursorLeft = position++;
+                Console.CursorLeft += cursorIni;
+                Console.Write(" ");
+            }
+
+            //draw totals
+            Console.CursorLeft = 35 + cursorIni;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Write(progress.ToString() + " of " + total.ToString() + "    "); //blanks at the end remove any excess
+        }
     }
 }

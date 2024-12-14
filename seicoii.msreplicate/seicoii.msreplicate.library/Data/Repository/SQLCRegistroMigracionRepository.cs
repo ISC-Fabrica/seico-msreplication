@@ -19,6 +19,7 @@ namespace seicoii.msreplicate.library.Data.Repository
     {
 
         string connectionString = ConfigurationManager.ConnectionStrings["SEICOII_WEB"].ConnectionString;
+        string filtroTablas = ConfigurationManager.AppSettings["FiltroTablas"] ?? string.Empty;
 
         public SQLCRegistroMigracionRepository() { }
 
@@ -148,12 +149,15 @@ namespace seicoii.msreplicate.library.Data.Repository
         public List<string> GetTables()
         {
             List<string> response = new List<string>();
+            string andTables = string.IsNullOrEmpty(filtroTablas) ? "" : $" AND nombre_table IN ({filtroTablas}) ";
+            string sentenciaSQL = Constantes.Select_TablasPendientes.Replace("{condicion_adicional}", andTables);
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.GetTables()");
-                    SqlDataAdapter adapter = new SqlDataAdapter(Constantes.Select_TablasPendientes, connection);
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    SqlDataAdapter adapter = new SqlDataAdapter(sentenciaSQL, connection);
                     connection.Open();
                     DataSet dataSet = new DataSet();
                     adapter.Fill(dataSet);
@@ -165,11 +169,13 @@ namespace seicoii.msreplicate.library.Data.Repository
                 catch (OdbcException ex)
                 {
                     Logger.Log("OdbcException in: SQLCRegistroMigracionRepository.GetTables()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 catch (Exception ex)
                 {
                     Logger.Log("Exception in: SQLCRegistroMigracionRepository.GetTables()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 return response;
@@ -192,22 +198,30 @@ namespace seicoii.msreplicate.library.Data.Repository
                     adapter.Fill(dataSet);
                     if (dataSet.Tables.Count > 0)
                     {
-                        response = dataSet.Tables[0].AsEnumerable().Select(x => new ColumnTable
-                        {
-                            ColumnName = x["name"].ToString()!,
-                            ColumnType = x["type"].ToString()!,
-                            IsNullable = x["isnullable"].ToString()!.Trim().Equals("1"),
-                        }).ToList();
+                        response = dataSet.Tables[0].AsEnumerable()
+                            .Where(y => (
+                                    !y["name"].ToString().Trim().ToLower().Equals("factura_id") &&
+                                    !y["name"].ToString().Trim().ToLower().Equals("pk_id")
+                                    ))
+                            .Select(x => new ColumnTable
+                            {
+                                ColumnName = x["name"].ToString()!,
+                                ColumnType = x["type"].ToString()!,
+                                IsNullable = x["isnullable"].ToString()!.Trim().Equals("1"),
+                            }
+                        ).ToList();
                     }
                 }
                 catch (OdbcException ex)
                 {
                     Logger.Log("OdbcException in: SQLCRegistroMigracionRepository.GetColumnTables()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 catch (Exception ex)
                 {
                     Logger.Log("Exception in: SQLCRegistroMigracionRepository.GetColumnTables()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 return response;
@@ -217,8 +231,6 @@ namespace seicoii.msreplicate.library.Data.Repository
         public List<ColumnValues> GetColumnValues(string Table, List<ColumnTable> columns, string Condition)
         {
             List<ColumnValues> response = new List<ColumnValues>();
-
-            Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.GetColumnValues()");
 
             var ColumnasSQL = string.Empty;
             foreach (var column in columns)
@@ -232,15 +244,19 @@ namespace seicoii.msreplicate.library.Data.Repository
                 ColumnasSQL = Utils.ConcatenateString(ColumnasSQL, columna);
             }
 
+            string sentenciaSQL = Constantes.Select_TableInfo
+                                    .Replace("{Columns}", ColumnasSQL)
+                                    .Replace("{nombre_table}", Table)
+                                    .Replace("{Condition}", Condition);
+
+            Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.GetColumnValues()");
+            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
-                    SqlDataAdapter adapter = new SqlDataAdapter(Constantes.Select_TableInfo
-                                                                        .Replace("{Columns}", ColumnasSQL)
-                                                                        .Replace("{nombre_table}", Table)
-                                                                        .Replace("{Condition}", Condition)
-                                                                        , connection);
+                    SqlDataAdapter adapter = new SqlDataAdapter(sentenciaSQL, connection);
                     connection.Open();
                     DataSet dataSet = new DataSet();
                     adapter.Fill(dataSet);
@@ -283,12 +299,14 @@ namespace seicoii.msreplicate.library.Data.Repository
         public List<temp_registroMigracion> GetPendings(string table)
         {
             List<temp_registroMigracion> response = new List<temp_registroMigracion>();
+            string sentenciaSQL = Constantes.Select_RegistroMigracionPendientes.Replace("{nombre_table}", table);
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.GetPendings()");
-                    SqlDataAdapter adapter = new SqlDataAdapter(Constantes.Select_RegistroMigracionPendientes.Replace("{nombre_table}", table), connection);
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    SqlDataAdapter adapter = new SqlDataAdapter(sentenciaSQL, connection);
                     connection.Open();
                     DataSet dataSet = new DataSet();
                     adapter.Fill(dataSet);
@@ -314,11 +332,13 @@ namespace seicoii.msreplicate.library.Data.Repository
                 catch (OdbcException ex)
                 {
                     Logger.Log("OdbcException in: SQLCRegistroMigracionRepository.GetPendings()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 catch (Exception ex)
                 {
                     Logger.Log("Exception in: SQLCRegistroMigracionRepository.GetPendings()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 return response;
@@ -329,12 +349,14 @@ namespace seicoii.msreplicate.library.Data.Repository
         {
 
             bool response = false;
+            string sentenciaSQL = Constantes.Update_EstadoTablasPendientes.Replace("{id}", id.ToString());
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.UpdateStateMigrated()");
-                    SqlCommand command = new(Constantes.Update_EstadoTablasPendientes.Replace("{id}", id.ToString()), connection);
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
+                    SqlCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var re = command.ExecuteNonQuery();
 
@@ -343,11 +365,13 @@ namespace seicoii.msreplicate.library.Data.Repository
                 catch (OdbcException ex)
                 {
                     Logger.Log("OdbcException in: SQLCRegistroMigracionRepository.UpdateStateMigrated()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 catch (Exception ex)
                 {
                     Logger.Log("Exception in: SQLCRegistroMigracionRepository.UpdateStateMigrated()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     Logger.Log(ex.ToString());
                 }
                 return response;
@@ -361,7 +385,8 @@ namespace seicoii.msreplicate.library.Data.Repository
             {
                 message = "";
             }
-            else if (message.Length > 500) {
+            else if (message.Length > 500) 
+            {
                 message = message.Substring(0, 500);
             }
 
@@ -413,6 +438,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.UpdateStateErroneo()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     SqlCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var re = command.ExecuteNonQuery();
@@ -460,6 +486,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.InsertDataMigrated()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     SqlCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var reader = command.ExecuteReader();
@@ -496,6 +523,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.DeleteDataMigrated()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     SqlCommand command = new(sentenciaSQL, connection);
                     connection.Open();
                     var re = command.ExecuteNonQuery();
@@ -526,13 +554,13 @@ namespace seicoii.msreplicate.library.Data.Repository
                                             .Replace("{condiciones}", Condition);
 
             Logger.Log("SQLCRegistroMigracionRepository.ValidateDataBeforeInsert() - BEGIN");
-            Logger.Log($"Sentencia SQL: {sentenciaSQL}");
 
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
                     Logger.Log("Ejecutando Metodo: SQLCRegistroMigracionRepository.ValidateDataBeforeInsert()");
+                    Logger.Log($"Sentencia SQL: {sentenciaSQL}");
                     SqlDataAdapter adapter = new SqlDataAdapter(sentenciaSQL, connection);
                     connection.Open();
                     DataSet dataSet = new DataSet();
@@ -620,9 +648,9 @@ namespace seicoii.msreplicate.library.Data.Repository
             string Mensaje = "Registro Actualizado con éxito";
             bool response = false;
             string sentenciaSQL = Constantes.Update_Tables
-                                    .Replace("{nombre_tabla}", Table)
-                                    .Replace("{valores}", SetColumns)
-                                    .Replace("{condiciones}", Condition);
+                                        .Replace("{nombre_tabla}", Table)
+                                        .Replace("{valores}", SetColumns)
+                                        .Replace("{condiciones}", Condition);
 
             Logger.Log("SQLCRegistroMigracionRepository.UpdateData() - BEGIN");
             Logger.Log($"Sentencia SQL: {sentenciaSQL}");
@@ -647,7 +675,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                     }
                     if (Convert.ToInt32(totalRegistros) == 0)
                     {
-                        Mensaje = $"Registro no fue ACTUALIZADO, no concide con la condición: \"{Condition}\"";
+                        Mensaje = $"Registro no fue ACTUALIZADO, no concide con la condición: [{Condition.Replace("'", "\"")}]";
                     }
                     Logger.Log($"REGISTROS ACTUALIZADOS = {totalRegistros}");
                     Logger.Log("SQLCRegistroMigracionRepository.UpdateData() - END");
@@ -677,9 +705,9 @@ namespace seicoii.msreplicate.library.Data.Repository
         {
             string Mensaje = "Registro Eliminado con éxito";
             bool response = false;
-            string sentenciaSQL = Constantes.Update_Tables
-                                    .Replace("{nombre_tabla}", Table)
-                                    .Replace("{condiciones}", Condition);
+            string sentenciaSQL = Constantes.Delete_Tables
+                                            .Replace("{nombre_tabla}", Table)
+                                            .Replace("{condiciones}", Condition);
 
             Logger.Log("SQLCRegistroMigracionRepository.DeleteData() - BEGIN");
             Logger.Log($"Sentencia SQL: {sentenciaSQL}");
@@ -704,7 +732,7 @@ namespace seicoii.msreplicate.library.Data.Repository
                     }
                     if (Convert.ToInt32(totalRegistros) == 0)
                     {
-                        Mensaje = $"Registro no fue ELIMINADO, no concide con la condición: \"{Condition}\"";
+                        Mensaje = $"Registro no fue ELIMINADO, no concide con la condición: [{Condition.Replace("'", "\"")}]";
                     }
                     Logger.Log($"REGISTROS ELIMINADOS = {totalRegistros}");
                     Logger.Log("SQLCRegistroMigracionRepository.DeleteData() - END");

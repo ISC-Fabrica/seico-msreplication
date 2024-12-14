@@ -54,7 +54,11 @@ namespace seicoii.msreplicate.library.Common
 
 
         public static string Select_TablasPendientes =
-            "SELECT distinct nombre_table FROM temp_registroMigracion WHERE status = 1 order by nombre_table ";
+            "SELECT distinct nombre_table \r\n" +
+            "FROM temp_registroMigracion \r\n" +
+            "WHERE status = 1 \r\n" +
+            "{condicion_adicional} \r\n" +
+            "order by nombre_table ";
 
         public static string Select_RegistroMigracionPendientes =
             "SET DATEFORMAT YMD;\r\n" +
