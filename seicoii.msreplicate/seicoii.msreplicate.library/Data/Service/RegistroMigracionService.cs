@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace seicoii.msreplicate.library.Data.Service
 {
-    public class RegistroMigracionService
+    public class RegistroMigracionService:IDisposable
     {
         IRegistroMigracionRepository _Repository_ODBC = new ODBCRegistroMigracionRepository();
         IRegistroMigracionRepository _Repository_SQLC = new SQLCRegistroMigracionRepository();
@@ -611,6 +611,12 @@ namespace seicoii.msreplicate.library.Data.Service
             Console.CursorLeft = 35 + cursorIni;
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Write(progress.ToString() + " of " + total.ToString() + "    "); //blanks at the end remove any excess
+        }
+
+        public void Dispose()
+        {
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
         }
     }
 }

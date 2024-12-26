@@ -55,7 +55,7 @@ namespace seicoii.msreplicate.library.Common
 
         public static string Select_TablasPendientes =
             "SELECT distinct nombre_table \r\n" +
-            "FROM temp_registroMigracion \r\n" +
+            "FROM temp_registroMigracion with(nolock) \r\n" +
             "WHERE status = 1 \r\n" +
             "{condicion_adicional} \r\n" +
             "order by nombre_table ";
@@ -63,14 +63,14 @@ namespace seicoii.msreplicate.library.Common
         public static string Select_RegistroMigracionPendientes =
             "SET DATEFORMAT YMD;\r\n" +
             "SELECT id, nombre_table, tipo, codigo, codigo2, codigo3, codigo4, codigo5, codigo6, observacion, status, CONVERT(varchar,fechaRegistro,121) as fechaRegistro " +
-            "FROM temp_registroMigracion " +
+            "FROM temp_registroMigracion with(nolock) " +
             "WHERE status = 1 and nombre_table = '{nombre_table}' " +
             "Order By id";
 
 
         public static string Select_TableInfo =
             "SET DATEFORMAT YMD;\r\n" +
-            "SELECT {Columns} FROM {nombre_table} {Condition}";
+            "SELECT {Columns} FROM {nombre_table} with(nolock) {Condition}";
 
 
 
@@ -121,7 +121,7 @@ namespace seicoii.msreplicate.library.Common
 
 
         public static string Select_ExistRecordTable =
-            "SELECT distinct 1 as existe FROM {nombre_tabla} {condiciones}";
+            "SELECT distinct 1 as existe FROM {nombre_tabla} with(nolock) {condiciones}";
 
 
     }
